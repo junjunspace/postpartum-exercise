@@ -25,7 +25,8 @@
 
 .screen-body {
   flex: 1;
-  overflow: hidden;
+  height: 0;
+  min-height: 0;
 }
 
 /* 运动目标 */

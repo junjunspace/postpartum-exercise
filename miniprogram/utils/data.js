@@ -29,7 +29,7 @@ const EXERCISES = [
       totalSets: 2,
       rest: 10,
       steps: [
-        { cue: '准备好了，我们开始踝泵运动', phase: '准备', dur: 4, audio: '/audio/e01/01.m4a' },
+        { cue: '准备好了，我们开始踝泵运动', phase: '准备', dur: 6, audio: '/audio/e01/01.m4a' },
         { cue: '脚尖向上勾起', phase: '背屈 · 保持 3 秒', dur: 3, hint: '每个动作 3 秒', audio: '/audio/e01/02.m4a' },
         { cue: '向下绷直', phase: '跖屈 · 保持 3 秒', dur: 3, hint: '每个动作 3 秒', audio: '/audio/e01/03.m4a' },
         { cue: '顺时针缓慢画圆', phase: '画圆 · 约 10 秒', dur: 10, audio: '/audio/e01/04.m4a' },
@@ -65,7 +65,7 @@ const EXERCISES = [
       totalSets: 3,
       rest: 15,
       steps: [
-        { cue: '双膝屈曲，双手轻放腹部，跟着我呼吸', phase: '准备', dur: 4, audio: '/audio/e02/01.m4a' },
+        { cue: '双膝屈曲，双手轻放腹部，跟着我呼吸', phase: '准备', dur: 6, audio: '/audio/e02/01.m4a' },
         { cue: '鼻子缓慢吸气……', phase: '吸气 · 4秒', dur: 4, audio: '/audio/e02/02.m4a' },
         { cue: '缓慢呼出……', phase: '呼气 · 6秒', dur: 6, audio: '/audio/e02/03.m4a' }
       ],
@@ -99,7 +99,7 @@ const EXERCISES = [
       totalSets: 3,
       rest: 15,
       steps: [
-        { cue: '放松全身，感受盆底', phase: '准备', dur: 4, audio: '/audio/e03/01.m4a' },
+        { cue: '放松全身，感受盆底', phase: '准备', dur: 6, audio: '/audio/e03/01.m4a' },
         { cue: '缓慢收缩……', phase: '收缩 · 5秒', dur: 5, audio: '/audio/e03/02.m4a' },
         { cue: '完全放松盆底——不要用力', phase: '放松 · 5秒', dur: 5, audio: '/audio/e03/03.m4a' },
         { cue: '快速收缩！', phase: '快速抽动', dur: 1, audio: '/audio/e03/04.m4a' }
@@ -134,7 +134,7 @@ const EXERCISES = [
       totalSets: 2,
       rest: 20,
       steps: [
-        { cue: '仰卧屈膝，先做一次腹式呼吸', phase: '准备', dur: 8, audio: '/audio/e04/01.m4a' },
+        { cue: '仰卧屈膝，先做一次腹式呼吸', phase: '准备', dur: 6, audio: '/audio/e04/01.m4a' },
         { cue: '呼气，轻轻内收肚脐', phase: '内收', dur: 6, audio: '/audio/e04/02.m4a' },
         { cue: '保持内收，正常呼吸', phase: '维持 10秒', dur: 10, hint: '保持自然呼吸，不要憋气', audio: '/audio/e04/03.m4a' },
         { cue: '放松', phase: '放松 3秒', dur: 3, audio: '/audio/e04/04.m4a' }
@@ -168,7 +168,7 @@ const EXERCISES = [
       rest: 0,
       mode: 'guide',
       steps: [
-        { cue: '我们练习正确的翻身起床', phase: '准备', dur: 3, audio: '/audio/e05/01.m4a' },
+        { cue: '我们练习正确的翻身起床', phase: '准备', dur: 6, audio: '/audio/e05/01.m4a' },
         { cue: '双腿一起滚向侧方', phase: '步骤一', dur: 4, audio: '/audio/e05/02.m4a' },
         { cue: '手肘和手掌撑床', phase: '步骤二', dur: 4, audio: '/audio/e05/03.m4a' },
         { cue: '推起身体至坐位', phase: '步骤三', dur: 3, audio: '/audio/e05/04.m4a' },
@@ -202,7 +202,7 @@ const EXERCISES = [
       totalSets: 2,
       rest: 15,
       steps: [
-        { cue: '仰卧屈膝，准备好了', phase: '准备', dur: 3, audio: '/audio/e06/01.m4a' },
+        { cue: '仰卧屈膝，准备好了', phase: '准备', dur: 6, audio: '/audio/e06/01.m4a' },
         { cue: '呼气，激活核心', phase: '核心激活', dur: 3, audio: '/audio/e06/02.m4a' },
         { cue: '右腿缓慢沿床面滑出', phase: '右腿滑出', dur: 3, audio: '/audio/e06/03.m4a' },
         { cue: '停顿', phase: '保持 2秒', dur: 2, audio: '/audio/e06/04.m4a' },
@@ -242,7 +242,7 @@ const EXERCISES = [
       rest: 0,
       mode: 'guide',
       steps: [
-        { cue: '我们来做一次坐姿检查', phase: '开始', dur: 4, audio: '/audio/e07/01.m4a' },
+        { cue: '我们来做一次坐姿检查', phase: '开始', dur: 6, audio: '/audio/e07/01.m4a' },
         { cue: '坐骨均匀承重，不塌腰', phase: '骨盆中立', dur: 8, audio: '/audio/e07/02.m4a' },
         { cue: '肩膀自然后落，不耸肩', phase: '肩部放松', dur: 8, audio: '/audio/e07/03.m4a' },
         { cue: '深呼吸，感受正确体态', phase: '放松感受', dur: 8, audio: '/audio/e07/04.m4a' }

@@ -7,12 +7,14 @@ Page({
   },
 
   onLoad(options) {
-    const id = options.id;
-    const ex = EXERCISES.find(e => e.id === id);
-    if (ex) {
-      this.setData({ ex });
-      wx.setNavigationBarTitle({ title: ex.name });
+    var id = options.id;
+    var ex = EXERCISES.find(function(e) { return e.id === id; });
+    if (!ex) {
+      console.error('detail: exercise not found', id);
+      return;
     }
+    this.setData({ ex: ex });
+    wx.setNavigationBarTitle({ title: ex.name });
   },
 
   startPractice() {

@@ -34,7 +34,8 @@
 
 .screen-body {
   flex: 1;
-  overflow: hidden;
+  height: 0;
+  min-height: 0;
 }
 
 /* 基本信息 */
@@ -142,13 +143,17 @@
 }
 
 .spacer {
-  height: 40rpx;
+  height: 160rpx;
 }
 
 /* 底部栏 */
 .bottom-bar {
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   padding: 24rpx 40rpx 56rpx;
   background: var(--card);
   border-top: 2rpx solid var(--border);
+  z-index: 10;
 }

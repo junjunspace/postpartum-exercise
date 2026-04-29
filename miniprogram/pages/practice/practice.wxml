@@ -49,14 +49,12 @@
   <view class="ctrl-bar">
     <view class="ctrl-sm" bindtap="askExit">
       <text class="ctrl-icon">✕</text>
-      <text class="ctrl-label">结束</text>
     </view>
     <view class="ctrl-lg" bindtap="togglePause">
       <text class="ctrl-lg-icon">{{paused ? '▶' : '❚❚'}}</text>
     </view>
     <view class="ctrl-sm" bindtap="askSkip">
       <text class="ctrl-icon">⏭</text>
-      <text class="ctrl-label">跳过本组</text>
     </view>
   </view>
 </view>
@@ -75,13 +73,12 @@
 
 <!-- 跳过确认弹窗 -->
 <view class="modal-mask" wx:if="{{showSkipModal}}">
-  <view class="skip-sheet">
-    <view class="skip-handle"></view>
-    <text class="skip-title">跳过本组剩余步骤？</text>
-    <text class="skip-sub">将跳过剩余步骤，直接进入组间休息</text>
-    <view class="skip-btns">
-      <view class="skip-btn-cancel" bindtap="hideSkip">继续跟练</view>
-      <view class="skip-btn-ok" bindtap="confirmSkip">确认跳过</view>
+  <view class="modal-box">
+    <text class="modal-title">跳过本组剩余步骤？</text>
+    <text class="modal-body">将跳过剩余步骤，直接进入组间休息</text>
+    <view class="modal-btns">
+      <view class="modal-btn-cancel" bindtap="hideSkip">继续跟练</view>
+      <view class="modal-btn-ok modal-btn-green" bindtap="confirmSkip">确认跳过</view>
     </view>
   </view>
 </view>
