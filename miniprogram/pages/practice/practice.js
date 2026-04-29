@@ -35,6 +35,7 @@ Page({
   _currentSet: 0,
   _tick: null,
   _audio: null,
+  _audioSrc: null,
   _exercise: null,
   _nextExId: null,
 
@@ -75,6 +76,7 @@ Page({
 
   onUnload() {
     this._clearTimers();
+    if (this._audio) { this._audio.stop(); this._audio.destroy(); this._audio = null; this._audioSrc = null; }
   },
 
   // ---- build sequence ----
@@ -196,12 +198,14 @@ Page({
       this._playAudio(this._seq[this._idx]);
     } else {
       // pause
+      if (this._audio) this._audio.pause();
       this._clearTimers();
       this.setData({ paused: true });
     }
   },
 
   askSkip() {
+    if (this._audio) this._audio.pause();
     this._clearTimers();
     this.setData({ showSkipModal: true });
   },
@@ -231,6 +235,7 @@ Page({
   },
 
   askExit() {
+    if (this._audio) this._audio.pause();
     this._clearTimers();
     this.setData({ showExitModal: true });
   },
@@ -277,22 +282,34 @@ Page({
       this._audio.stop();
       this._audio.destroy();
       this._audio = null;
+      this._audioSrc = null;
     }
   },
 
   // ---- audio ----
   _playAudio(step) {
-    if (this._audio) { this._audio.stop(); this._audio.destroy(); this._audio = null; }
-    if (!this.data.voiceOn || !step || !step.audio) return;
+    if (!this.data.voiceOn || !step || !step.audio) {
+      if (this._audio) { this._audio.stop(); this._audio.destroy(); this._audio = null; this._audioSrc = null; }
+      return;
+    }
+    // 暂停状态恢复时，同一条音频续播（但已播完的不重复）
+    if (this._audio && this._audioSrc === step.audio) {
+      if (!this._audioEnd) this._audio.play();
+      return;
+    }
+    if (this._audio) { this._audio.stop(); this._audio.destroy(); this._audio = null; this._audioSrc = null; }
+    var self = this;
     var audio = wx.createInnerAudioContext();
     audio.src = step.audio;
+    audio.onEnded(function() { self._audioEnd = true; });
     audio.play();
     this._audio = audio;
+    this._audioSrc = step.audio;
+    this._audioEnd = false;
   },
 
   // ---- helpers ----
   _clearTimers() {
     if (this._tick) { clearInterval(this._tick); this._tick = null; }
-    if (this._audio) { this._audio.stop(); this._audio.destroy(); this._audio = null; }
   }
 });
