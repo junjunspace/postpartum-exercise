@@ -20,11 +20,15 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页"
+        "text": "首页",
+        "iconPath": "images/tabbar/home.png",
+        "selectedIconPath": "images/tabbar/home-active.png"
       },
       {
         "pagePath": "pages/stage/stage",
-        "text": "跟练"
+        "text": "跟练",
+        "iconPath": "images/tabbar/practice.png",
+        "selectedIconPath": "images/tabbar/practice-active.png"
       }
     ]
   },
