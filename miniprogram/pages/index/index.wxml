@@ -1,0 +1,103 @@
+<!--pages/index/index.wxml - 首页 · 阶段选择-->
+<view class="container">
+  <view class="home-header">
+    <text class="home-greeting">嗨，你来了 ✨</text>
+    <text class="home-title">选择运动康复阶段</text>
+    <text class="home-sub">科学分阶段，陪你一步步恢复</text>
+  </view>
+
+  <scroll-view class="screen-body" scroll-y>
+    <view class="stage-list">
+      <!-- 第一阶段：可选 -->
+      <view class="s-card-on" bindtap="goStage">
+        <view class="s-card-left">
+          <view class="s-badge s-badge-on">第一阶段</view>
+          <text class="s-period">产后 0—6 周</text>
+          <text class="s-date-hint">第 1 天至第 42 天</text>
+          <text class="s-sub">急性修复期</text>
+          <view class="s-tags">
+            <text class="tag tag-white">7个动作</text>
+          </view>
+        </view>
+        <view class="s-arrow">
+          <text class="arrow-text">›</text>
+        </view>
+      </view>
+
+      <!-- 第二阶段：锁定 -->
+      <view class="s-card-off" bindtap="onLockedTap">
+        <view class="s-card-left">
+          <view class="s-badge-off">第二阶段</view>
+          <text class="s-period-off">产后 6—12 周</text>
+          <text class="s-sub-off">功能重建期</text>
+        </view>
+        <view class="s-lock">
+          <text class="lock-text">🔒</text>
+        </view>
+      </view>
+
+      <!-- 第三阶段：锁定 -->
+      <view class="s-card-off" bindtap="onLockedTap">
+        <view class="s-card-left">
+          <view class="s-badge-off">第三阶段</view>
+          <text class="s-period-off">产后 3—6 个月</text>
+          <text class="s-sub-off">强化训练期</text>
+        </view>
+        <view class="s-lock">
+          <text class="lock-text">🔒</text>
+        </view>
+      </view>
+
+      <!-- 第四阶段：锁定 -->
+      <view class="s-card-off" bindtap="onLockedTap">
+        <view class="s-card-left">
+          <view class="s-badge-off">第四阶段</view>
+          <text class="s-period-off">产后 6 个月以上</text>
+          <text class="s-sub-off">全面恢复期</text>
+        </view>
+        <view class="s-lock">
+          <text class="lock-text">🔒</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 医学禁忌弹窗 -->
+  <view class="modal-mask" wx:if="{{showDisclaimer}}">
+    <view class="modal-box disclaimer-box">
+      <text class="modal-icon">🛡️</text>
+      <text class="modal-title">开始前，请确认以下情况</text>
+      <view class="warn-strip">
+        <text class="warn-icon">⚠️</text>
+        <text class="warn-text">有以下任一情况请暂停使用，先咨询医生</text>
+      </view>
+      <view class="cond-list">
+        <view class="cond-item"><text class="cond-dot">·</text><text>恶露量突然增多或出现血块</text></view>
+        <view class="cond-item"><text class="cond-dot">·</text><text>伤口出现红肿、发热、渗液</text></view>
+        <view class="cond-item"><text class="cond-dot">·</text><text>持续发热（体温 > 38°C）</text></view>
+      </view>
+      <view class="modal-btn-ok disclaimer-btn" bindtap="confirmDisclaimer">✓ 我已了解，开始使用</view>
+    </view>
+  </view>
+
+  <!-- 分娩方式筛查 -->
+  <view class="modal-mask" wx:if="{{showDelivery}}">
+    <view class="modal-box delivery-box">
+      <text class="modal-title">你是哪种分娩方式？</text>
+      <text class="modal-sub">我们会根据你的选择推荐适合的训练计划</text>
+      <view class="delivery-row">
+        <view class="delivery-btn active" bindtap="selectDelivery" data-type="vaginal">
+          <text class="delivery-icon">♥</text>
+          <text class="delivery-name">顺产</text>
+          <text class="delivery-desc">自然分娩</text>
+        </view>
+        <view class="delivery-btn" bindtap="selectDelivery" data-type="csection">
+          <text class="delivery-icon">✂</text>
+          <text class="delivery-name">剖宫产</text>
+          <text class="delivery-desc">剖腹产</text>
+        </view>
+      </view>
+      <text class="delivery-note">⚠ 剖宫产妈妈部分动作术后2周内暂缓开放，所有安排均遵循临床指南</text>
+    </view>
+  </view>
+</view>

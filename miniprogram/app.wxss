@@ -1,0 +1,96 @@
+/* ================================================================
+   全局样式 — Design Tokens
+   ================================================================ */
+page {
+  --bg: #FAF7F4;
+  --primary: #8BAF9A;
+  --primary-dk: #7EA894;
+  --primary-lt: #E8F2EC;
+  --dark-bg: #2A3530;
+  --dark-surface: #1E2826;
+  --dark-card: #3D524A;
+  --dark-muted: #5A7A6E;
+  --dark-txt: #9EC4B2;
+  --txt-1: #3D3530;
+  --txt-2: #8C7E77;
+  --txt-3: #C0B8B4;
+  --card: #FFFFFF;
+  --border: #EDE8E4;
+  --warn: #D4875A;
+  --warn-bg: #FFF8F0;
+  --warm-bg: #FFF3E8;
+  --warm: #C49060;
+  --r-sm: 16rpx;
+  --r-md: 24rpx;
+  --r-lg: 32rpx;
+  --r-full: 999rpx;
+
+  font-family: -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--txt-1);
+}
+
+/* ================================================================
+   通用组件
+   ================================================================ */
+
+/* 标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 24rpx;
+  border-radius: var(--r-full);
+  font-size: 24rpx;
+  font-weight: 600;
+}
+.tag-green { background: var(--primary-lt); color: #6A9882; }
+.tag-warm  { background: var(--warm-bg);   color: var(--warm); }
+.tag-gray  { background: #F0EDE9;          color: var(--txt-2); }
+
+/* 主按钮 */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  width: 100%;
+  height: 104rpx;
+  border-radius: var(--r-full);
+  background: var(--primary);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  box-shadow: 0 8rpx 32rpx rgba(139, 175, 154, 0.35);
+}
+.btn-primary:active {
+  opacity: 0.85;
+}
+
+/* 深色主题按钮 */
+.btn-primary-dark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  width: 100%;
+  height: 108rpx;
+  border-radius: var(--r-full);
+  background: var(--primary);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  box-shadow: 0 8rpx 32rpx rgba(139, 175, 154, 0.4);
+}
+
+.btn-secondary-dark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 96rpx;
+  border-radius: var(--r-full);
+  background: var(--dark-card);
+  color: var(--dark-txt);
+  font-size: 30rpx;
+  font-weight: 500;
+}

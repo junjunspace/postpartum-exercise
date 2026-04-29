@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>产后修复</title>
+<!--
+  迁移至微信小程序时的关键变化：
+  1. HTML → WXML，CSS → WXSS（单位 px → rpx，1px ≈ 2rpx @ 375px 设计稿）
+  2. JS 操作 DOM → Page/Component setData()
+  3. 路由：navigateTo / navigateBack / redirectTo
+  4. 定时器：JS setInterval → 原生 setInterval（小程序支持，但生命周期需管理）
+  5. 语音：注释中已标出 wx.textToSpeech 调用点
+  6. 震动：注释中已标出 wx.vibrateShort 调用点
+  7. 存储：localStorage → wx.setStorageSync / wx.getStorageSync
+-->
+<style>
+/* ================================================================
+   1. Design Tokens
+   WeChat MP: 定义在 app.wxss 中作为全局 CSS 变量
+   ================================================================ */
+:root {
+  /* Colors */
+  --bg:            #FAF7F4;
+  --primary:       #8BAF9A;
+  --primary-dk:    #7EA894;
+  --primary-lt:    #E8F2EC;
+  --dark-bg:       #2A3530;
+  --dark-surface:  #1E2826;
+  --dark-card:     #3D524A;
+  --dark-muted:    #5A7A6E;
+  --dark-txt:      #9EC4B2;
+  --txt-1:         #3D3530;
+  --txt-2:         #8C7E77;
+  --txt-3:         #C0B8B4;
+  --card:          #FFFFFF;
+  --border:        #EDE8E4;
+  --warn:          #D4875A;
+  --warn-bg:       #FFF8F0;
+  --warm-bg:       #FFF3E8;
+  --warm:          #C49060;
+  /* Radius */
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --r-full: 999px;
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(61,53,48,.06);
+  --shadow-btn:  0 4px 16px rgba(139,175,154,.35);
+}
+
+/* ================================================================
+   2. Reset & Base
+   ================================================================ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body {
+  width:100%; height:100%;
+  background:#D8D0C8; /* outer frame bg */
+  font-family:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+button { font-family:inherit; cursor:pointer; border:none; }
+svg { display:block; }
+
+/* ================================================================
+   3. App Shell
+   ================================================================ */
+#app {
+  position:relative;
+  width:100%; max-width:390px;
+  height:100vh;
+  margin:0 auto;
+  overflow:hidden;
+  background:var(--bg);
+  /* WeChat MP: 不需要此容器，小程序原生 fullscreen */
+}
+
+/* ================================================================
+   4. Screen System — 滑动式页面切换
+   WeChat MP: 使用 wx.navigateTo / wx.navigateBack 替代
+   ================================================================ */
+.screen {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--bg);
+  transform:translateX(100%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+  will-change:transform;
+}
+.screen.active  { transform:translateX(0); }
+.screen.leaving { transform:translateX(-28%); }
+
+/* ================================================================
+   5. Common Components
+   ================================================================ */
+
+/* Status bar spacer — 适配刘海屏 */
+.status-bar {
+  height:44px; flex-shrink:0;
+  /* WeChat MP: 动态设置 height = wx.getSystemInfoSync().statusBarHeight */
+}
+
+/* Nav bar */
+.nav-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  height:56px; padding:0 20px; flex-shrink:0;
+}
+.nav-back {
+  display:flex; align-items:center; gap:4px;
+  font-size:15px; color:var(--txt-1); cursor:pointer;
+  padding:8px 8px 8px 0; /* enlarge tap area */
+}
+.nav-back svg { flex-shrink:0; }
+.nav-title  { font-size:17px; font-weight:600; color:var(--txt-1); }
+.nav-spacer { width:60px; }
+
+/* Scrollable body area inside a screen */
+.screen-body {
+  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+
+/* Bottom action bar — sticky at screen bottom */
+.bottom-bar {
+  flex-shrink:0;
+  padding:12px 20px 28px;
+  background:var(--card);
+  border-top:1px solid var(--border);
+}
+.bottom-bar.dark {
+  background:var(--dark-bg);
+  border-top:none;
+  padding:12px 24px 40px;
+}
+
+/* Buttons */
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; border:none; cursor:pointer;
+  font-size:16px; font-weight:700;
+  transition:opacity .15s, transform .12s;
+}
+.btn:active { opacity:.85; transform:scale(.98); }
+.btn-primary {
+  height:52px; border-radius:var(--r-full);
+  background:var(--primary); color:#fff;
+  box-shadow:var(--shadow-btn);
+}
+.btn-primary-dark {
+  height:54px; border-radius:var(--r-full);
+  background:var(--primary); color:#fff;
+  box-shadow:0 4px 16px rgba(139,175,154,.4);
+}
+.btn-secondary-dark {
+  height:48px; border-radius:var(--r-full);
+  background:var(--dark-card); color:var(--dark-txt);
+  font-weight:500;
+}
+
+/* Tag chips */
+.tag {
+  display:inline-flex; align-items:center;
+  padding:4px 12px; border-radius:var(--r-full);
+  font-size:12px; font-weight:600;
+}
+.tag-green { background:var(--primary-lt); color:#6A9882; }
+.tag-warm  { background:var(--warm-bg);    color:var(--warm); }
+.tag-gray  { background:#F0EDE9;           color:var(--txt-2); }
+.tag-white { background:rgba(255,255,255,.22); color:#fff; }
+
+/* Tab bar */
+.tab-bar {
+  display:flex; align-items:center; justify-content:space-around;
+  height:80px; flex-shrink:0;
+  background:var(--card);
+  border-top:1px solid var(--border);
+  padding-bottom:10px;
+}
+.tab-item {
+  display:flex; flex-direction:column; align-items:center;
+  gap:4px; cursor:pointer; padding:6px 16px;
+}
+.tab-item svg   { width:24px; height:24px; }
+.tab-item span  { font-size:10px; }
+.tab-item.on  svg  { stroke:var(--primary); }
+.tab-item.on  span { color:var(--primary); font-weight:600; }
+.tab-item.off svg  { stroke:var(--txt-3); }
+.tab-item.off span { color:var(--txt-3); }
+
+/* Section header */
+.section-hd {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 20px 8px; flex-shrink:0;
+}
+.section-hd h3 { font-size:15px; font-weight:700; color:var(--txt-1); }
+.section-hd span{ font-size:13px; color:var(--txt-2); }
+
+/* ================================================================
+   6. Screen 1 — 首页 / 阶段选择
+   ================================================================ */
+.home-header { padding:20px 24px 16px; flex-shrink:0; }
+.home-greeting{ font-size:13px; color:var(--txt-2); margin-bottom:6px; }
+.home-title   { font-size:26px; font-weight:700; color:var(--txt-1); line-height:1.2; }
+.home-sub     { font-size:13px; color:var(--txt-2); margin-top:6px; }
+
+.stage-list {
+  padding:8px 20px 20px;
+  display:flex; flex-direction:column; gap:14px;
+}
+
+/* Active stage card */
+.s-card-on {
+  border-radius:var(--r-lg);
+  padding:20px;
+  background:linear-gradient(135deg,#7EA894 0%,#9EC4B0 100%);
+  display:flex; align-items:center; gap:16px;
+  min-height:140px; cursor:pointer;
+  transition:transform .15s;
+}
+.s-card-on:active { transform:scale(.98); }
+.s-card-left { flex:1; }
+.s-badge {
+  display:inline-flex; padding:5px 12px;
+  border-radius:var(--r-full);
+  font-size:11px; font-weight:600; color:#fff;
+  margin-bottom:7px;
+}
+.s-badge-on  { background:rgba(255,255,255,.25); }
+.s-badge-off { background:#F0EDE9; color:var(--txt-2); font-size:11px; font-weight:600;
+               padding:5px 12px; border-radius:var(--r-full); display:inline-flex; margin-bottom:6px; }
+.s-period    { font-size:20px; font-weight:700; color:#fff; margin-bottom:4px; }
+.s-sub       { font-size:13px; color:rgba(255,255,255,.8); }
+.s-tags      { display:flex; gap:8px; margin-top:8px; }
+.s-arrow {
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,.25);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+
+/* Locked stage card */
+.s-card-off {
+  border-radius:var(--r-lg);
+  padding:20px;
+  background:var(--card); border:1.5px solid var(--border);
+  display:flex; align-items:center; gap:16px;
+  min-height:120px; cursor:pointer; opacity:.75;
+  transition:opacity .15s;
+}
+.s-card-off:active { opacity:.55; }
+.s-period-off { font-size:18px; font-weight:700; color:var(--txt-3); margin-bottom:4px; }
+.s-sub-off    { font-size:13px; color:#C8C0BC; }
+.s-lock {
+  width:36px; height:36px; border-radius:50%;
+  background:#F5F2EF;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+
+/* ================================================================
+   7. Screen 2 — 阶段详情 / 动作列表
+   ================================================================ */
+.stage-banner {
+  padding:0 24px 20px;
+  background:linear-gradient(180deg,var(--primary-dk) 0%,var(--primary) 100%);
+  flex-shrink:0;
+}
+.stage-banner h2 { font-size:22px; font-weight:700; color:#fff; }
+.stage-banner p  { font-size:12px; color:rgba(255,255,255,.75); margin-top:4px; }
+
+.goal-card {
+  background:var(--card); padding:16px 20px; flex-shrink:0;
+}
+.goal-card h3  { font-size:14px; font-weight:700; color:var(--txt-1); margin-bottom:12px; }
+.goal-list     { display:flex; flex-direction:column; gap:8px; }
+.goal-item     { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--txt-1); }
+.goal-dot      { width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0; }
+
+.ex-list { padding:0 16px 16px; display:flex; flex-direction:column; gap:10px; }
+.ex-item {
+  display:flex; align-items:center; gap:12px;
+  padding:0 14px; height:68px;
+  background:var(--card); border-radius:var(--r-md); border:1px solid var(--border);
+  cursor:pointer; transition:background .12s;
+}
+.ex-item:active { background:#F5F2EF; }
+.ex-icon {
+  width:44px; height:44px; border-radius:10px; background:var(--primary-lt);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ex-icon svg { stroke:var(--primary); }
+.ex-info { flex:1; }
+.ex-name { font-size:15px; font-weight:600; color:var(--txt-1); }
+.ex-freq { font-size:12px; color:var(--txt-2); margin-top:3px; }
+.ex-chevron svg { stroke:var(--txt-3); }
+.more-hint { text-align:center; font-size:13px; font-weight:600; color:var(--primary); padding:4px 0 4px; }
+
+/* ================================================================
+   8. Screen 3 — 动作详情
+   ================================================================ */
+.ex-img {
+  background:var(--primary-lt); height:200px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+}
+.ex-img-circle {
+  width:80px; height:80px; border-radius:50%; background:var(--primary);
+  display:flex; align-items:center; justify-content:center;
+}
+.ex-img-circle svg { stroke:#fff; }
+.ex-img p { font-size:13px; color:var(--primary); }
+
+.detail-info { background:var(--card); padding:18px 20px 14px; flex-shrink:0; }
+.detail-name { font-size:22px; font-weight:700; color:var(--txt-1); margin-bottom:10px; }
+.detail-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.detail-purpose { font-size:13px; color:var(--txt-2); line-height:1.65; }
+
+.steps-sec { background:var(--bg); padding:16px 20px 12px; flex-shrink:0; }
+.steps-sec h3 { font-size:15px; font-weight:700; color:var(--txt-1); margin-bottom:12px; }
+.step-item { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+.step-num  {
+  width:26px; height:26px; border-radius:50%; background:var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.step-txt { font-size:13px; color:var(--txt-1); line-height:1.65; padding-top:3px; }
+
+.notes-sec { background:var(--warn-bg); padding:16px 20px; flex-shrink:0; }
+.notes-hd  { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.notes-hd svg  { stroke:var(--warn); flex-shrink:0; }
+.notes-hd span { font-size:14px; font-weight:700; color:var(--warn); }
+.note-item { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
+.note-dot  { width:5px; height:5px; border-radius:50%; background:var(--warn); flex-shrink:0; margin-top:6px; }
+.note-txt  { font-size:13px; color:var(--txt-2); line-height:1.65; }
+
+/* ================================================================
+   9. Screen 4 — 口令跟练
+   ================================================================ */
+#screen-practice { background:var(--dark-bg); }
+
+.p-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; height:56px; flex-shrink:0;
+}
+.p-close {
+  width:36px; height:36px; border-radius:50%; background:var(--dark-card);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  border:none;
+}
+.p-close svg { stroke:var(--dark-txt); }
+.p-nav-title { font-size:17px; font-weight:600; color:#fff; }
+
+.p-progress { padding:8px 24px 0; flex-shrink:0; }
+.p-progress-row {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+}
+.p-lbl { font-size:13px; color:var(--dark-txt); }
+.p-track { width:100%; height:4px; background:var(--dark-card); border-radius:2px; overflow:hidden; }
+.p-fill  { height:100%; background:var(--primary); border-radius:2px; transition:width .4s ease; }
+
+.p-main {
+  flex:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:22px; padding:0 24px;
+}
+
+.cue-text {
+  font-size:28px; font-weight:700; color:#9EC4B2;
+  text-align:center; line-height:1.3; letter-spacing:.5px;
+  transition:opacity .2s;
+}
+.cue-text.rest { color:var(--dark-muted); font-size:22px; }
+
+/* Circular timer */
+.timer-wrap { position:relative; width:220px; height:220px; flex-shrink:0; }
+.timer-svg  {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  transform:rotate(-90deg); /* start from 12 o'clock */
+}
+.ring-bg       { fill:var(--dark-surface); }
+.ring-track    { fill:none; stroke:var(--dark-card); stroke-width:10; }
+.ring-progress {
+  fill:none; stroke:var(--primary); stroke-width:10; stroke-linecap:round;
+  stroke-dasharray:553;
+  stroke-dashoffset:0;
+}
+.ring-progress.rest { stroke:var(--dark-muted); }
+
+/* 圆环由 JS requestAnimationFrame 驱动，此处无 CSS 动画 */
+.timer-num {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-size:72px; font-weight:700; color:#E8F2EC; line-height:1;
+  /* WeChat MP: 使用 text 组件 */
+}
+
+.phase-chip {
+  padding:8px 20px; border-radius:var(--r-full);
+  background:var(--dark-card);
+  font-size:14px; color:var(--dark-txt);
+}
+.next-cue-txt { font-size:13px; color:var(--dark-muted); text-align:center; }
+
+.ctrl-bar {
+  display:flex; align-items:center; justify-content:center;
+  gap:40px; padding:16px 40px 40px; flex-shrink:0;
+}
+.ctrl-sm {
+  width:60px; height:60px; border-radius:50%;
+  background:var(--dark-card); border:none;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  cursor:pointer; transition:opacity .15s;
+}
+.ctrl-sm:active { opacity:.7; }
+.ctrl-sm svg   { stroke:var(--dark-txt); }
+.ctrl-sm span  { font-size:10px; color:var(--dark-muted); }
+.ctrl-lg {
+  width:80px; height:80px; border-radius:50%;
+  background:var(--primary); border:none;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(139,175,154,.4);
+  transition:transform .12s, box-shadow .12s;
+}
+.ctrl-lg:active { transform:scale(.93); box-shadow:0 2px 10px rgba(139,175,154,.3); }
+.ctrl-lg svg { stroke:#fff; }
+
+/* ================================================================
+   10. Screen 5 — 练习完成
+   ================================================================ */
+#screen-complete { background:var(--dark-bg); }
+
+.done-top {
+  display:flex; justify-content:flex-end;
+  padding:12px 20px 0; flex-shrink:0;
+}
+.done-close {
+  width:36px; height:36px; border-radius:50%; background:var(--dark-card);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; border:none;
+}
+.done-close svg { stroke:var(--dark-txt); }
+
+.done-hero {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:20px; padding:0 32px;
+}
+.check-circle {
+  width:100px; height:100px; border-radius:50%; background:var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{ transform:scale(0); opacity:0; } to{ transform:scale(1); opacity:1; } }
+.check-circle svg { stroke:#fff; }
+.done-title    { font-size:34px; font-weight:700; color:#fff; }
+.done-subtitle { font-size:16px; color:var(--dark-txt); }
+.encourage-card {
+  width:100%; background:var(--dark-surface); border-radius:var(--r-lg);
+  padding:20px 24px;
+  font-size:15px; color:var(--dark-txt); line-height:1.8;
+  text-align:center; white-space:pre-line;
+}
+.stats-row { display:flex; gap:12px; width:100%; }
+.stat-card {
+  flex:1; background:var(--dark-surface); border-radius:14px;
+  padding:16px 0;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.stat-val { font-size:26px; font-weight:700; color:var(--primary); }
+.stat-lbl { font-size:12px; color:var(--dark-muted); }
+
+.done-bottom { padding:0 24px 44px; display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
+
+/* ================================================================
+   11. Modal / Sheet
+   ================================================================ */
+.modal-mask {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.55); z-index:50;
+  display:flex; align-items:flex-end;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s;
+}
+.modal-mask.show { opacity:1; pointer-events:all; }
+.modal-sheet {
+  width:100%; background:#fff; border-radius:20px 20px 0 0;
+  padding:24px 24px 44px;
+  transform:translateY(100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.modal-mask.show .modal-sheet { transform:translateY(0); }
+.modal-title { font-size:18px; font-weight:700; color:var(--txt-1); margin-bottom:8px; }
+.modal-body  { font-size:14px; color:var(--txt-2); margin-bottom:24px; line-height:1.6; }
+.modal-acts  { display:flex; flex-direction:column; gap:12px; }
+.btn-modal-p {
+  width:100%; height:50px; border-radius:var(--r-full); border:none;
+  background:var(--primary); color:#fff; font-size:16px; font-weight:600; cursor:pointer;
+}
+.btn-modal-s {
+  width:100%; height:50px; border-radius:var(--r-full); border:none;
+  background:#F0EDE9; color:var(--txt-2); font-size:16px; cursor:pointer;
+}
+
+/* ================================================================
+   12. Toast
+   WeChat MP: 使用 wx.showToast()
+   ================================================================ */
+.toast {
+  position:absolute; bottom:110px; left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:rgba(42,53,48,.9); color:#fff;
+  padding:10px 20px; border-radius:var(--r-full);
+  font-size:14px; white-space:nowrap;
+  opacity:0; pointer-events:none; z-index:100;
+  transition:opacity .2s, transform .2s;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ================================================================
+     Screen 1 · 首页 / 阶段选择
+     WeChat MP: pages/index/index
+     ================================================================ -->
+<div class="screen active" id="s-home">
+  <div class="status-bar"></div>
+  <div class="home-header">
+    <p class="home-greeting">你好，宝妈 ✨</p>
+    <h1 class="home-title">选择康复阶段</h1>
+    <p class="home-sub">科学分阶段，陪你一步步恢复</p>
+  </div>
+  <div class="screen-body">
+    <div class="stage-list">
+
+      <!-- 第一阶段：可选 -->
+      <div class="s-card-on" onclick="Nav.go('s-stage')">
+        <div class="s-card-left">
+          <div class="s-badge s-badge-on">第一阶段</div>
+          <div class="s-period">产后 0—6 周</div>
+          <div class="s-sub">急性修复期</div>
+          <div class="s-tags">
+            <span class="tag tag-white">7个动作</span>
+          </div>
+        </div>
+        <div class="s-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 第二-四阶段：锁定 -->
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第二阶段</div>
+          <div class="s-period-off">产后 6—12 周</div>
+          <div class="s-sub-off">功能重建期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第三阶段</div>
+          <div class="s-period-off">产后 3—6 个月</div>
+          <div class="s-sub-off">强化训练期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第四阶段</div>
+          <div class="s-period-off">产后 6 个月以上</div>
+          <div class="s-sub-off">全面恢复期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /screen-body -->
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item on">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="tab-item off" onclick="UI.toast('跟练功能在动作详情页启动')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      <span>跟练</span>
+    </div>
+    <div class="tab-item off" onclick="UI.toast('我的功能即将上线 💚')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     Screen 2 · 阶段详情 / 动作列表
+     WeChat MP: pages/stage/stage
+     ================================================================ -->
+<div class="screen" id="s-stage">
+  <div class="status-bar" style="background:#7EA894"></div>
+  <div class="nav-bar" style="background:#7EA894">
+    <div class="nav-back" onclick="Nav.back()" style="color:#fff">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      返回
+    </div>
+    <span class="nav-title" style="color:#fff">第一阶段</span>
+    <div class="nav-spacer"></div>
+  </div>
+  <div class="stage-banner">
+    <h2>产后 0—6 周</h2>
+    <p>急性修复期 · 顺产24h后 / 剖宫产48-72h后开始</p>
+  </div>
+
+  <div class="screen-body">
+    <div class="goal-card">
+      <h3>本阶段运动目标</h3>
+      <div class="goal-list">
+        <div class="goal-item"><div class="goal-dot"></div><span>促进血液循环，预防下肢血栓</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>温和激活盆底和深层核心</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>改善呼吸模式，恢复核心内压调控</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>缓解腰背疼痛和水肿</span></div>
+      </div>
+    </div>
+
+    <div class="section-hd">
+      <h3>本阶段动作</h3>
+      <span>共 7 个动作</span>
+    </div>
+    <div class="ex-list" id="ex-list"><!-- 由 JS 渲染 --></div>
+  </div><!-- /screen-body -->
+
+  <div class="bottom-bar">
+    <button class="btn btn-primary" onclick="Practice.startFull()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      开始全套跟练
+    </button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     Screen 3 · 动作详情
+     WeChat MP: pages/exercise/exercise?id=xxx
+     ================================================================ -->
+<div class="screen" id="s-detail">
+  <div class="status-bar"></div>
+  <div class="nav-bar">
+    <div class="nav-back" onclick="Nav.back()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      返回
+    </div>
+    <span class="nav-title" id="d-title"></span>
+    <div class="nav-spacer"></div>
+  </div>
+  <div class="screen-body">
+    <div class="ex-img">
+      <div class="ex-img-circle">
+        <svg id="d-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </div>
+      <p>动作示意图</p>
+    </div>
+    <div class="detail-info">
+      <div class="detail-name" id="d-name"></div>
+      <div class="detail-tags" id="d-tags"></div>
+      <div class="detail-purpose" id="d-purpose"></div>
+    </div>
+    <div class="steps-sec">
+      <h3>动作步骤</h3>
+      <div id="d-steps"></div>
+    </div>
+    <div class="notes-sec">
+      <div class="notes-hd">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>注意事项</span>
+      </div>
+      <div id="d-notes"></div>
+    </div>
+  </div><!-- /screen-body -->
+  <div class="bottom-bar">
+    <button class="btn btn-primary" onclick="Practice.startSingle()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      开始跟练此动作
+    </button>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     Screen 4 · 口令跟练
+     WeChat MP: pages/practice/practice
+     ================================================================ -->
+<div class="screen" id="s-practice">
+  <div class="status-bar" style="background:var(--dark-bg)"></div>
+  <div class="p-nav">
+    <button class="p-close" onclick="Practice.askExit()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="p-nav-title" id="p-ex-name"></span>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="p-progress">
+    <div class="p-progress-row">
+      <span class="p-lbl" id="p-set-lbl">第 1 组 / 共 2 组</span>
+      <span class="p-lbl" id="p-rep-lbl"></span>
+    </div>
+    <div class="p-track"><div class="p-fill" id="p-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="p-main">
+    <div class="cue-text" id="p-cue">准备开始</div>
+
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 220 220">
+        <circle class="ring-bg"       cx="110" cy="110" r="110"/>
+        <circle class="ring-track"    cx="110" cy="110" r="88"/>
+        <circle class="ring-progress" cx="110" cy="110" r="88" id="p-ring"/>
+      </svg>
+      <div class="timer-num" id="p-num">--</div>
+    </div>
+
+    <div class="phase-chip" id="p-phase">准备</div>
+    <div class="next-cue-txt" id="p-next"></div>
+  </div>
+
+  <div class="ctrl-bar">
+    <button class="ctrl-sm" onclick="Practice.timer.end()" title="结束">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      <span>结束</span>
+    </button>
+    <button class="ctrl-lg" id="p-pause-btn" onclick="Practice.timer.togglePause()">
+      <svg id="p-pause-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/>
+      </svg>
+    </button>
+    <button class="ctrl-sm" onclick="Practice.timer.skip()" title="跳过">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      <span>跳过</span>
+    </button>
+  </div>
+
+  <!-- 退出确认 Modal -->
+  <div class="modal-mask" id="exit-modal">
+    <div class="modal-sheet">
+      <div class="modal-title">确认结束跟练？</div>
+      <div class="modal-body">当前进度不会保存，要继续努力哦 💪</div>
+      <div class="modal-acts">
+        <button class="btn-modal-p" onclick="Practice.hideExit()">继续跟练</button>
+        <button class="btn-modal-s" onclick="Practice.confirmExit()">确认退出</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     Screen 5 · 练习完成
+     WeChat MP: pages/complete/complete
+     ================================================================ -->
+<div class="screen" id="s-complete">
+  <div class="status-bar" style="background:var(--dark-bg)"></div>
+  <div class="done-top">
+    <button class="done-close" onclick="Nav.go('s-home',true)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="done-hero">
+    <div class="check-circle">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="done-title">太棒了！</div>
+    <div class="done-subtitle" id="done-sub">踝泵运动已完成</div>
+    <div class="encourage-card" id="done-encourage"></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="done-sets">2</div>
+        <div class="stat-lbl">组已完成</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="done-time">3 min</div>
+        <div class="stat-lbl">训练时长</div>
+      </div>
+    </div>
+  </div>
+  <div class="done-bottom">
+    <button class="btn btn-primary-dark" id="done-next-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      继续下一个动作
+    </button>
+    <button class="btn btn-secondary-dark" onclick="Nav.go('s-stage',true)">返回动作列表</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+</div><!-- /#app -->
+
+<!-- ================================================================
+     JavaScript
+     ================================================================ -->
+<script>
+'use strict';
+
+/* ----------------------------------------------------------------
+   数据层 — 第一阶段全部动作
+   WeChat MP: 移至 data/stage1.js，通过 require 引入
+   ---------------------------------------------------------------- */
+const EXERCISES = [
+  {
+    id: 'e01',
+    name: '踝泵运动',
+    icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    tags: [
+      { label:'预防血栓', cls:'tag-green' },
+      { label:'小腿肌群', cls:'tag-warm'  },
+      { label:'每小时1-2组', cls:'tag-gray' }
+    ],
+    purpose: '激活小腿肌肉泵，促进静脉回流，预防深静脉血栓（DVT）。无论顺产或剖宫产，术后当天即可在床上开始。',
+    steps: [
+      '脚尖向上勾起（背屈），保持 2 秒',
+      '脚尖向下绷直（跖屈），保持 2 秒',
+      '顺时针画圆 10 次，逆时针画圆 10 次'
+    ],
+    notes: [
+      '剖宫产术后当天在床上即可开始',
+      '小腿出现明显肿痛、发热、发红时立即停止，警惕血栓'
+    ],
+    freq: '每小时 1-2 组 · 各方向 20 次',
+    practice: {
+      totalSets: 2,
+      rest: 10,
+      steps: [
+        { cue:'准备好了，我们开始踝泵运动', phase:'准备', dur:3 },
+        { cue:'脚尖向上勾起',  phase:'背屈 · 保持 2 秒', dur:2 },
+        { cue:'向下绷直',      phase:'跖屈 · 保持 2 秒', dur:2 },
+        { cue:'顺时针画圆',    phase:'画圆 · 顺时针',    dur:10 },
+        { cue:'逆时针画圆',    phase:'画圆 · 逆时针',    dur:10 }
+      ],
+      // PRD 节奏：向上勾起+向下绷直 交替20次，再加画圆
+      // 用 repeatGroup 表示"循环执行 [step2, step3] 20 次"
+      repeatGroup: { from: 1, to: 2, times: 20 }
+    }
+  },
+  {
+    id: 'e02',
+    name: '腹式呼吸',
+    icon: '<path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>',
+    tags: [
+      { label:'激活横膈膜', cls:'tag-green' },
+      { label:'核心内压',   cls:'tag-warm'  },
+      { label:'每天2-3次',  cls:'tag-gray'  }
+    ],
+    purpose: '重建横膈膜-盆底协同机制，恢复核心内压调控，激活腹横肌。是产后最基础也最重要的康复练习之一。',
+    steps: [
+      '仰卧屈膝，双手轻放腹部',
+      '鼻子缓慢吸气 4 秒，感受腹部向四周柔和扩张，盆底随之轻柔放松',
+      '用嘴缓慢呼气 6 秒（可发"嘶"声），腹部温和内收，盆底随之上提',
+      '共做 10-15 次为一组'
+    ],
+    notes: [
+      '不要用力憋气或用力推腹',
+      '剖宫产初期若切口有牵拉感属正常，不要因此屏住呼吸',
+      '若头晕，减慢呼吸节奏或休息片刻'
+    ],
+    freq: '每天 2-3 次 · 每次 10-15 分钟',
+    practice: {
+      totalSets: 3,
+      rest: 20,
+      steps: [
+        { cue:'双膝屈曲，双手轻放腹部，跟着我呼吸', phase:'准备',       dur:4 },
+        { cue:'鼻子缓慢吸气……',                      phase:'吸气 · 4秒', dur:4 },
+        { cue:'缓慢呼出……',                           phase:'呼气 · 6秒', dur:6 }
+      ],
+      repeatGroup: { from: 1, to: 2, times: 10 }
+    }
+  },
+  {
+    id: 'e03',
+    name: '基础凯格尔',
+    icon: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+    tags: [
+      { label:'唤醒盆底',  cls:'tag-green' },
+      { label:'盆底肌群',  cls:'tag-warm'  },
+      { label:'每天3组',   cls:'tag-gray'  }
+    ],
+    purpose: '唤醒盆底本体感觉，温和激活盆底肌，改善产后漏尿和盆腔器官支撑力。',
+    steps: [
+      '仰卧屈膝，全身放松，先感受盆底完全放松（想象如一朵花打开）',
+      '缓慢收缩盆底（想象用肌肉阻断排尿），保持 5 秒',
+      '缓慢放松，完全松开，保持 5 秒',
+      '快速收缩放松，1秒1次，共10次为一组'
+    ],
+    notes: [
+      '顺产会阴伤口疼痛加剧时停止，待减轻后再尝试',
+      '不要同时收紧臀部、大腿或腹部',
+      '不要在排尿过程中练习憋尿'
+    ],
+    freq: '每天 3 组 · 慢缩×10 + 快缩×10',
+    practice: {
+      totalSets: 3,
+      rest: 15,
+      steps: [
+        { cue:'放松全身，感受盆底',   phase:'准备',       dur:4  },
+        { cue:'缓慢收缩……',           phase:'收缩 · 5秒', dur:5 },
+        { cue:'缓慢放松……',           phase:'放松 · 5秒', dur:5 },
+        { cue:'快速收缩！',            phase:'快速抽动',   dur:1 }
+      ],
+      repeatGroup: { from: 1, to: 2, times: 10 },
+      repeatGroup2: { from: 3, to: 3, times: 10 }
+    }
+  },
+  {
+    id: 'e04',
+    name: '腹横肌激活',
+    icon: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+    tags: [
+      { label:'深层核心', cls:'tag-green' },
+      { label:'腹横肌',   cls:'tag-warm'  },
+      { label:'每天2次',  cls:'tag-gray'  }
+    ],
+    purpose: '在最安全体位下激活最深层腹肌，避免增加腹内压，是修复腹直肌分离的基础练习。',
+    steps: [
+      '仰卧屈膝，先做一次腹式呼吸',
+      '呼气时，轻轻将肚脐向脊柱方向内收（像把肚皮从裤腰带上拿开）',
+      '保持轻度内收，做 3-5 次正常呼吸后放松',
+      '重复 8-10 次为一组'
+    ],
+    notes: [
+      '千万不要憋气！应能在保持内收的同时正常呼吸',
+      '剖宫产若腹部切口有牵拉感，减小内收幅度'
+    ],
+    freq: '每天 2 次 · 每次 8-10 个',
+    practice: {
+      totalSets: 2,
+      rest: 20,
+      steps: [
+        { cue:'仰卧屈膝，先做一次腹式呼吸',  phase:'准备',      dur:8 },
+        { cue:'呼气，轻轻内收肚脐',            phase:'内收',      dur:6 },
+        { cue:'保持内收，正常呼吸',             phase:'维持 10秒', dur:10 },
+        { cue:'放松',                           phase:'放松 3秒',  dur:3 }
+      ],
+      repeatGroup: { from: 1, to: 3, times: 10 }
+    }
+  },
+  {
+    id: 'e05',
+    name: '翻身起床姿势',
+    icon: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.37"/>',
+    tags: [
+      { label:'日常动作',  cls:'tag-green' },
+      { label:'保护腹压',  cls:'tag-gray'  }
+    ],
+    purpose: '减少腹压，保护腹直肌和盆底，防止剖宫产伤口在起床时受力撕裂。每次起床都应执行。',
+    steps: [
+      '先将双腿一起滚向侧方',
+      '用下方手肘和上方手掌撑床，将身体推起至坐位',
+      '坐稳后再慢慢起立',
+      '【禁止】直接从仰卧坐起——这会极大增加腹内压'
+    ],
+    notes: [
+      '剖宫产妈妈尤其重要，每次起床都要使用此方法',
+      '坐起后先感受一下，无头晕再缓慢站立'
+    ],
+    freq: '日常动作 · 每次起床时执行',
+    practice: {
+      totalSets: 1,
+      rest: 0,
+      steps: [
+        { cue:'我们练习正确的翻身起床',  phase:'准备',  dur:3 },
+        { cue:'双腿一起滚向侧方',        phase:'步骤一', dur:4 },
+        { cue:'手肘和手掌撑床',          phase:'步骤二', dur:4 },
+        { cue:'推起身体至坐位',          phase:'步骤三', dur:3 },
+        { cue:'坐稳，缓慢起立',          phase:'步骤四', dur:4 }
+      ]
+    }
+  },
+  {
+    id: 'e06',
+    name: '床上腿部运动',
+    icon: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    tags: [
+      { label:'下肢力量',   cls:'tag-green' },
+      { label:'髋屈肌',     cls:'tag-warm'  },
+      { label:'每天1-2组',  cls:'tag-gray'  }
+    ],
+    purpose: '在不增加腹内压的前提下，温和激活髋屈肌和下肢肌肉，改善血液循环，预防下肢无力。',
+    steps: [
+      '仰卧屈膝，双脚平踩床面',
+      '呼气，轻度激活腹横肌（轻轻内收肚脐）',
+      '缓慢将一条腿沿床面向远端滑出，脚跟不离床',
+      '腿伸直后停顿 1-2 秒，再缓慢弯回，两侧交替'
+    ],
+    notes: [
+      '腿滑出时腰背不要拱起，保持脊柱中立',
+      '感觉腹部"撑起来"说明腹压过大，减小动作幅度'
+    ],
+    freq: '每天 1-2 组 · 每侧 10 次',
+    practice: {
+      totalSets: 2,
+      rest: 15,
+      steps: [
+        { cue:'仰卧屈膝，准备好了',          phase:'准备',      dur:3  },
+        { cue:'呼气，激活核心',               phase:'核心激活',  dur:3  },
+        { cue:'右腿缓慢沿床面滑出',           phase:'右腿滑出',  dur:3 },
+        { cue:'停顿',                         phase:'保持 2秒',  dur:2 },
+        { cue:'缓慢弯回',                     phase:'收腿',      dur:3 },
+        { cue:'换左腿',                        phase:'换腿',      dur:2  },
+        { cue:'左腿缓慢沿床面滑出',           phase:'左腿滑出',  dur:3 },
+        { cue:'停顿',                         phase:'保持 2秒',  dur:2 },
+        { cue:'缓慢弯回',                     phase:'收腿',      dur:3 }
+      ],
+      repeatGroup: { from: 2, to: 4, times: 10 },
+      repeatGroup2: { from: 6, to: 8, times: 10 }
+    }
+  },
+  {
+    id: 'e07',
+    name: '坐姿与站姿管理',
+    icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    tags: [
+      { label:'姿势纠正',  cls:'tag-green' },
+      { label:'日常指导',  cls:'tag-gray'  }
+    ],
+    purpose: '纠正产后常见的腰椎过度前凸和圆肩驼背，减轻哺乳造成的颈肩疲劳，降低慢性腰痛风险。',
+    steps: [
+      '坐时坐骨均匀承重，不塌腰拱背',
+      '肩膀自然后落，哺乳时用哺乳枕垫高婴儿，避免低头弓背',
+      '站立时重心均匀分布在双脚，不习惯性偏重一侧',
+      '抱婴儿时不要总用单侧髋部"托孩子"'
+    ],
+    notes: [
+      '每隔 30 分钟提醒自己检查一次坐姿',
+      '哺乳姿势非常关键，长期弓背会加重颈椎问题'
+    ],
+    freq: '日常意识 · 随时调整',
+    practice: {
+      totalSets: 1,
+      rest: 0,
+      steps: [
+        { cue:'我们来做一次坐姿检查',      phase:'开始',    dur:4 },
+        { cue:'坐骨均匀承重，不塌腰',      phase:'骨盆中立', dur:8 },
+        { cue:'肩膀自然后落，不耸肩',      phase:'肩部放松', dur:8 },
+        { cue:'深呼吸，感受正确体态',      phase:'放松感受', dur:8 }
+      ]
+    }
+  }
+];
+
+const ENCOURAGEMENTS = [
+  '"每一次小小的坚持，\n都是送给自己最好的礼物。\n你正在一步步找回那个强大的自己 💚"',
+  '"今天的你，比昨天更好。\n身体正在悄悄记住每一次努力，\n继续加油！"',
+  '"产后康复不是赛跑，是一段温柔的旅程。\n你今天做到了，就是胜利 🌸"',
+  '"宝宝需要一个健康的妈妈，\n你正在为此努力，这很了不起！"',
+  '"休息是恢复的一部分，运动也是。\n你在照顾好自己，这值得骄傲 ✨"'
+];
+
+/* ----------------------------------------------------------------
+   导航系统
+   WeChat MP: 替换为 wx.navigateTo / wx.navigateBack / wx.redirectTo
+   ---------------------------------------------------------------- */
+const Nav = {
+  _stack: ['s-home'],
+
+  go(id, isRoot = false) {
+    const cur = document.querySelector('.screen.active');
+    if (cur) {
+      cur.classList.remove('active');
+      if (!isRoot) cur.classList.add('leaving');
+    }
+    if (isRoot) {
+      this._stack = [id];
+      document.querySelectorAll('.screen.leaving').forEach(s => s.classList.remove('leaving'));
+    } else {
+      if (cur) this._stack.push(cur.id);
+    }
+    const next = document.getElementById(id);
+    if (next) {
+      // 强制 reflow 触发动画
+      void next.offsetWidth;
+      next.classList.add('active');
+    }
+  },
+
+  back() {
+    if (this._stack.length <= 1) return;
+    const cur = document.querySelector('.screen.active');
+    if (cur) cur.classList.remove('active');
+
+    // 移除所有 leaving，把最后一个改为 active
+    const prevId = this._stack.pop();
+    document.querySelectorAll('.screen.leaving').forEach(s => s.classList.remove('leaving'));
+    const prev = document.getElementById(prevId);
+    if (prev) prev.classList.add('active');
+  }
+};
+
+/* ----------------------------------------------------------------
+   UI 工具
+   ---------------------------------------------------------------- */
+const UI = {
+  _toastTimer: null,
+
+  toast(msg) {
+    /* WeChat MP: wx.showToast({ title: msg, icon: 'none', duration: 2500 }) */
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+};
+
+/* ----------------------------------------------------------------
+   跟练计时器引擎
+   WeChat MP:
+   - setInterval → 原生 JS setInterval（小程序支持）
+   - 语音播报 → wx.textToSpeech()（已在注释中标出）
+   - 震动反馈 → wx.vibrateShort({ type:'light' })（已在注释中标出）
+   ---------------------------------------------------------------- */
+class PracticeTimer {
+  constructor() {
+    this._seq = [];      // 展开后的完整步骤序列
+    this._idx = 0;       // 当前步骤索引
+    this._left = 0;      // 当前步骤剩余秒数
+    this._total = 0;     // 序列总秒数（用于整体进度）
+    this._elapsed = 0;   // 已经过秒数
+    this._paused = false;
+    this._tid = null;
+    this._startTs = 0;
+    this.exercise = null;
+  }
+
+  /* 将步骤展开为扁平序列，支持 repeatGroup（循环一组步骤 N 次）*/
+  _build(exercise) {
+    const seq = [];
+    const { totalSets, steps, rest } = exercise.practice;
+    const p = exercise.practice;
+
+    for (let set = 1; set <= totalSets; set++) {
+      // 收集本组要输出的步骤索引（考虑 repeatGroup）
+      const indices = [];
+      let i = 0;
+      while (i < steps.length) {
+        // 检查是否有 repeatGroup 覆盖当前索引
+        const groups = [p.repeatGroup, p.repeatGroup2, p.repeatGroup3].filter(Boolean);
+        let matched = false;
+        for (const g of groups) {
+          if (i === g.from) {
+            for (let t = 0; t < g.times; t++) {
+              for (let j = g.from; j <= g.to; j++) {
+                indices.push({ stepIdx: j, rep: t + 1, totalRep: g.times });
+              }
+            }
+            i = g.to + 1;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          indices.push({ stepIdx: i });
+          i++;
+        }
+      }
+
+      for (const item of indices) {
+        const s = steps[item.stepIdx];
+        const entry = { cue: s.cue, phase: s.phase, dur: s.dur, set };
+        if (item.totalRep) {
+          entry.rep = item.rep;
+          entry.totalRep = item.totalRep;
+        }
+        seq.push(entry);
+      }
+
+      if (set < totalSets && rest > 0) {
+        seq.push({
+          cue: `很好！休息 ${rest} 秒`,
+          phase: `第 ${set} 组完成 · 休息`,
+          dur: rest, set, isRest: true
+        });
+      }
+    }
+    return seq;
+  }
+
+  start(exercise) {
+    this.stop();
+    this.exercise = exercise;
+    this._seq = this._build(exercise);
+    this._idx = 0;
+    this._elapsed = 0;
+    this._total = this._seq.reduce((s, step) => s + step.dur, 0);
+    this._paused = false;
+    this._startTs = Date.now();
+
+    // 更新标题
+    document.getElementById('p-ex-name').textContent = exercise.name;
+    // 重置暂停图标
+    this._setPauseIcon(false);
+
+    this._playStep();
+  }
+
+  _playStep() {
+    if (this._idx >= this._seq.length) { this._complete(); return; }
+    const step = this._seq[this._idx];
+    this._left = step.dur;
+    this._render(step);
+    this._startRingAnim(step); // 独立的环形动画，不依赖 CSS transition
+    this._startTick();
+
+    /* WeChat MP: 语音播报
+    if (!step.isRest) {
+      wx.textToSpeech({ lang:'zh_CN', speed:1, content: step.cue, success(res) {
+        const a = wx.createInnerAudioContext(); a.src = res.filename; a.play();
+      }});
+    }
+    */
+
+    /* WeChat MP: 震动反馈
+    wx.vibrateShort({ type:'light' });
+    */
+  }
+
+  _startTick() {
+    if (this._tid) clearInterval(this._tid);
+    // 立即显示当前步的起始秒数
+    this._render(this._seq[this._idx]);
+    this._tid = setInterval(() => {
+      if (this._paused) return;
+      this._left--;
+      this._elapsed++;
+      if (this._left < 0) this._left = 0;
+      this._render(this._seq[this._idx]);
+      if (this._left <= 0) {
+        clearInterval(this._tid);
+        this._idx++;
+        this._playStep();
+      }
+    }, 1000);
+  }
+
+  _render(step) {
+    if (!step) return;
+
+    // 进度条
+    const pct = Math.min(100, (this._idx / this._seq.length) * 100);
+    document.getElementById('p-fill').style.width = pct + '%';
+
+    // 组数
+    const totalSets = this.exercise.practice.totalSets;
+    document.getElementById('p-set-lbl').textContent = `第 ${step.set} 组 / 共 ${totalSets} 组`;
+
+    // 重复次数标签
+    const repTxt = (step.totalRep && step.totalRep > 1) ? `第 ${step.rep} / ${step.totalRep} 次` : '';
+    document.getElementById('p-rep-lbl').textContent = repTxt;
+
+    // 口令文字
+    const cueEl = document.getElementById('p-cue');
+    cueEl.textContent = step.cue;
+    cueEl.className = 'cue-text' + (step.isRest ? ' rest' : '');
+
+    // 阶段标签
+    document.getElementById('p-phase').textContent = step.phase || '';
+
+    // 倒计时数字（圆环本身由 _startRingAnim 的 @keyframes 驱动，不在此处更新）
+    document.getElementById('p-num').textContent = String(this._left).padStart(2, '0');
+
+    // 下一步提示
+    const nextStep = this._seq[this._idx + 1];
+    document.getElementById('p-next').textContent =
+      nextStep ? `下一步：${nextStep.cue}` : '即将完成 ✨';
+  }
+
+  /* rAF 驱动圆环动画，跟随倒计时同步 */
+  _startRingAnim(step) {
+    if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+
+    const ring = document.getElementById('p-ring');
+    if (!ring) return;
+    ring.setAttribute('class', 'ring-progress' + (step.isRest ? ' rest' : ''));
+    ring.style.transition = 'none';
+    ring.style.strokeDashoffset = '0';
+
+    this._ringDurMs = step.dur * 1000;
+    this._ringStartMs = performance.now();
+
+    const tick = () => {
+      if (this._paused) {
+        this._rafId = requestAnimationFrame(tick);
+        return;
+      }
+      const elapsed = performance.now() - this._ringStartMs;
+      const progress = Math.min(1, elapsed / this._ringDurMs);
+      ring.style.strokeDashoffset = String(553 * progress);
+      if (progress < 1) {
+        this._rafId = requestAnimationFrame(tick);
+      }
+    };
+    this._rafId = requestAnimationFrame(tick);
+  }
+
+  togglePause() {
+    this._paused = !this._paused;
+    this._setPauseIcon(this._paused);
+  }
+
+  _setPauseIcon(paused) {
+    const icon = document.getElementById('p-pause-icon');
+    icon.innerHTML = paused
+      ? '<polygon points="5 3 19 12 5 21 5 3"/>'
+      : '<line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/>';
+  }
+
+  skip() {
+    clearInterval(this._tid);
+    this._idx++;
+    setTimeout(() => this._playStep(), 80);
+  }
+
+  end() { Practice.askExit(); }
+
+  stop() {
+    clearInterval(this._tid);
+    this._tid = null;
+    this._paused = false;
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = null;
+    }
+    const ring = document.getElementById('p-ring');
+    if (ring) {
+      ring.style.transition = 'none';
+      ring.style.strokeDashoffset = '0';
+    }
+  }
+
+  _complete() {
+    clearInterval(this._tid);
+    const elapsed = Math.round((Date.now() - this._startTs) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    const timeStr = mins > 0 ? `${mins} min ${secs > 0 ? secs + 's' : ''}` : `${secs} 秒`;
+
+    const ex = this.exercise;
+    const idx = EXERCISES.findIndex(e => e.id === ex.id);
+    const nextEx = EXERCISES[idx + 1] || null;
+
+    document.getElementById('done-sub').textContent = `${ex.name}已完成`;
+    document.getElementById('done-sets').textContent = ex.practice.totalSets;
+    document.getElementById('done-time').textContent = timeStr;
+    document.getElementById('done-encourage').textContent =
+      ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+
+    const nextBtn = document.getElementById('done-next-btn');
+    if (nextEx) {
+      nextBtn.onclick = () => Practice.openExercise(nextEx.id);
+      nextBtn.querySelector('svg').style.display = '';
+      nextBtn.childNodes[nextBtn.childNodes.length - 1].textContent = `继续：${nextEx.name}`;
+    } else {
+      nextBtn.onclick = () => Nav.go('s-home', true);
+      nextBtn.querySelector('svg').style.display = 'none';
+      nextBtn.childNodes[nextBtn.childNodes.length - 1].textContent = '全套动作完成！返回首页 🎉';
+    }
+
+    Practice._completeEx = ex;
+    Nav.go('s-complete');
+  }
+}
+
+/* ----------------------------------------------------------------
+   跟练控制器
+   ---------------------------------------------------------------- */
+const Practice = {
+  timer: new PracticeTimer(),
+  _curId: 'e01',
+  _completeEx: null,
+
+  /* 渲染动作列表 */
+  renderList() {
+    const ICON_STUB = (path) =>
+      `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAF9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+
+    document.getElementById('ex-list').innerHTML = EXERCISES.map(ex => `
+      <div class="ex-item" onclick="Practice.openExercise('${ex.id}')">
+        <div class="ex-icon">${ICON_STUB(ex.icon)}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-freq">${ex.freq}</div>
+        </div>
+        <div class="ex-chevron">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  /* 打开动作详情 */
+  openExercise(id) {
+    const ex = EXERCISES.find(e => e.id === id);
+    if (!ex) return;
+    this._curId = id;
+
+    document.getElementById('d-title').textContent = ex.name;
+    document.getElementById('d-icon').innerHTML = ex.icon;
+    document.getElementById('d-name').textContent = ex.name;
+    document.getElementById('d-purpose').textContent = ex.purpose;
+
+    document.getElementById('d-tags').innerHTML =
+      ex.tags.map(t => `<span class="tag ${t.cls}">${t.label}</span>`).join('');
+
+    document.getElementById('d-steps').innerHTML =
+      ex.steps.map((s, i) => `
+        <div class="step-item">
+          <div class="step-num">${i + 1}</div>
+          <div class="step-txt">${s}</div>
+        </div>`).join('');
+
+    document.getElementById('d-notes').innerHTML =
+      ex.notes.map(n => `
+        <div class="note-item">
+          <div class="note-dot"></div>
+          <div class="note-txt">${n}</div>
+        </div>`).join('');
+
+    Nav.go('s-detail');
+  },
+
+  /* 从详情页开始单个动作 */
+  startSingle() {
+    const ex = EXERCISES.find(e => e.id === this._curId);
+    if (ex) this._launch(ex);
+  },
+
+  /* 从列表页开始全套 */
+  startFull() {
+    this._launch(EXERCISES[0]);
+  },
+
+  _launch(ex) {
+    this._curId = ex.id;
+    // 重置进度条
+    document.getElementById('p-fill').style.width = '0%';
+    this.timer._setPauseIcon(false);
+
+    Nav.go('s-practice');
+    // 等待页面过渡动画结束再启动计时
+    setTimeout(() => this.timer.start(ex), 350);
+  },
+
+  /* 退出确认弹窗 */
+  askExit() {
+    this.timer._paused = true;
+    this.timer._setPauseIcon(true);
+    document.getElementById('exit-modal').classList.add('show');
+  },
+  hideExit() {
+    document.getElementById('exit-modal').classList.remove('show');
+    this.timer._paused = false;
+    this.timer._setPauseIcon(false);
+  },
+  confirmExit() {
+    this.timer.stop();
+    document.getElementById('exit-modal').classList.remove('show');
+    Nav.go('s-stage', true);
+  }
+};
+
+/* ----------------------------------------------------------------
+   初始化
+   ---------------------------------------------------------------- */
+Practice.renderList();
+</script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>产后修复</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+
+<!-- Screen 1 · 首页 / 阶段选择 -->
+<div class="screen active" id="s-home">
+  <div class="status-bar"></div>
+  <div class="home-header">
+    <p class="home-greeting">嗨，你来了 ✨</p>
+    <h1 class="home-title">选择康复阶段</h1>
+    <p class="home-sub">科学分阶段，陪你一步步恢复</p>
+  </div>
+  <div class="screen-body">
+    <div class="stage-list">
+
+      <!-- 第一阶段：可选 -->
+      <div class="s-card-on" onclick="Nav.go('s-stage')">
+        <div class="s-card-left">
+          <div class="s-badge s-badge-on">第一阶段</div>
+          <div class="s-period">产后 0—6 周</div>
+          <div class="s-date-hint">第 1 天至第 42 天</div>
+          <div class="s-sub">急性修复期</div>
+          <div class="s-tags">
+            <span class="tag tag-white">7个动作</span>
+          </div>
+        </div>
+        <div class="s-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 第二-四阶段：锁定 -->
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第二阶段</div>
+          <div class="s-period-off">产后 6—12 周</div>
+          <div class="s-sub-off">功能重建期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第三阶段</div>
+          <div class="s-period-off">产后 3—6 个月</div>
+          <div class="s-sub-off">强化训练期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+      <div class="s-card-off" onclick="UI.toast('该阶段暂未开放，请先完成第一阶段 🌱')">
+        <div class="s-card-left">
+          <div class="s-badge-off">第四阶段</div>
+          <div class="s-period-off">产后 6 个月以上</div>
+          <div class="s-sub-off">全面恢复期</div>
+        </div>
+        <div class="s-lock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8C0BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item on">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="tab-item off" onclick="UI.toast('跟练功能在动作详情页启动')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      <span>跟练</span>
+    </div>
+    <div class="tab-item off" onclick="UI.toast('我的功能即将上线 💚')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- Screen 2 · 阶段详情 / 动作列表 -->
+<div class="screen" id="s-stage">
+  <div class="status-bar" style="background:#7EA894"></div>
+  <div class="nav-bar" style="background:#7EA894">
+    <div class="nav-back" onclick="Nav.back()" style="color:#fff">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      返回
+    </div>
+    <span class="nav-title" style="color:#fff">第一阶段</span>
+    <div class="nav-spacer"></div>
+  </div>
+  <div class="stage-banner">
+    <h2>产后 0—6 周</h2>
+    <p>急性修复期 · 顺产24h后 / 剖宫产48-72h后开始</p>
+  </div>
+
+  <div class="screen-body">
+    <div class="goal-card">
+      <h3>本阶段运动目标</h3>
+      <div class="goal-list">
+        <div class="goal-item"><div class="goal-dot"></div><span>促进血液循环，预防下肢血栓</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>温和激活盆底和深层核心</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>改善呼吸模式，恢复核心内压调控</span></div>
+        <div class="goal-item"><div class="goal-dot"></div><span>缓解腰背疼痛和水肿</span></div>
+      </div>
+    </div>
+
+    <div class="section-hd">
+      <h3>本阶段动作</h3>
+      <span>共 7 个动作</span>
+    </div>
+    <div class="ex-list" id="ex-list"></div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-primary" onclick="Practice.startFull()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      开始全套跟练
+    </button>
+  </div>
+</div>
+
+
+<!-- Screen 3 · 动作详情 -->
+<div class="screen" id="s-detail">
+  <div class="status-bar"></div>
+  <div class="nav-bar">
+    <div class="nav-back" onclick="Nav.back()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      返回
+    </div>
+    <span class="nav-title" id="d-title"></span>
+    <div class="nav-spacer"></div>
+  </div>
+  <div class="screen-body">
+    <div class="ex-img">
+      <div class="ex-img-circle">
+        <svg id="d-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </div>
+      <p>动作示意图</p>
+    </div>
+    <div class="detail-info">
+      <div class="detail-name" id="d-name"></div>
+      <div class="detail-tags" id="d-tags"></div>
+      <div class="detail-purpose" id="d-purpose"></div>
+    </div>
+    <div class="steps-sec">
+      <h3>动作步骤</h3>
+      <div id="d-steps"></div>
+    </div>
+    <div class="notes-sec">
+      <div class="notes-hd">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>注意事项</span>
+      </div>
+      <div id="d-notes"></div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn btn-primary" onclick="Practice.startSingle()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      开始跟练此动作
+    </button>
+  </div>
+</div>
+
+
+<!-- Screen 4 · 口令跟练 -->
+<div class="screen" id="s-practice">
+  <div class="status-bar" style="background:var(--dark-bg)"></div>
+  <div class="p-nav">
+    <button class="p-close" onclick="Practice.askExit()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="p-nav-title" id="p-ex-name"></span>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="p-progress">
+    <div class="p-progress-row">
+      <span class="p-lbl" id="p-set-lbl">第 1 组 / 共 2 组</span>
+      <span class="p-lbl" id="p-rep-lbl"></span>
+    </div>
+    <div class="p-track"><div class="p-fill" id="p-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="p-main">
+    <div class="cue-text" id="p-cue">准备开始</div>
+
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 220 220">
+        <circle class="ring-bg"       cx="110" cy="110" r="110"/>
+        <circle class="ring-track"    cx="110" cy="110" r="88"/>
+        <circle class="ring-progress" cx="110" cy="110" r="88" id="p-ring"/>
+      </svg>
+      <div class="timer-num" id="p-num">--</div>
+    </div>
+
+    <div class="phase-chip" id="p-phase">准备</div>
+    <div id="p-hint" class="hint-text" style="display:none"></div>
+    <div class="next-cue-txt" id="p-next"></div>
+  </div>
+
+  <div class="ctrl-bar">
+    <button class="ctrl-sm" onclick="Practice.timer.end()" title="结束">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      <span>结束</span>
+    </button>
+    <button class="ctrl-lg" id="p-pause-btn" onclick="Practice.timer.togglePause()">
+      <svg id="p-pause-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/>
+      </svg>
+    </button>
+    <button class="ctrl-sm" onclick="Practice.askSkip()" title="跳过本组">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      <span>跳过本组</span>
+    </button>
+  </div>
+
+  <!-- 退出确认 Modal -->
+  <div class="modal-mask" id="exit-modal">
+    <div class="modal-sheet">
+      <div class="modal-title">确认结束跟练？</div>
+      <div class="modal-body">当前进度不会保存，要继续努力哦 💪</div>
+      <div class="modal-acts">
+        <button class="btn-modal-p" onclick="Practice.hideExit()">继续跟练</button>
+        <button class="btn-modal-s" onclick="Practice.confirmExit()">确认退出</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Screen 5 · 练习完成 -->
+<div class="screen" id="s-complete">
+  <div class="status-bar" style="background:var(--dark-bg)"></div>
+  <div class="done-top">
+    <button class="done-close" onclick="Nav.go('s-home',true)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="done-hero">
+    <div class="check-circle">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="done-title">太棒了！</div>
+    <div class="done-subtitle" id="done-sub">踝泵运动已完成</div>
+    <div class="encourage-card" id="done-encourage"></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="done-sets">2</div>
+        <div class="stat-lbl">组已完成</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="done-time">3 min</div>
+        <div class="stat-lbl">训练时长</div>
+      </div>
+    </div>
+    <p class="safety-tip">如练习中出现疼痛加剧或出血增多，请立即停止并咨询医生</p>
+  </div>
+  <div class="done-bottom">
+    <button class="btn btn-primary-dark" id="done-next-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      继续下一个动作
+    </button>
+    <button class="btn btn-secondary-dark" onclick="Nav.go('s-stage',true)">返回动作列表</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 医学禁忌弹窗 -->
+<div class="modal-mask" id="disclaimerModal" style="display:none">
+  <div class="modal-box disclaimer-box">
+    <div class="modal-icon">🛡️</div>
+    <div class="modal-title">开始前，请确认以下情况</div>
+    <div class="warn-strip">
+      <span class="warn-icon">⚠️</span>
+      <span class="warn-text">有以下任一情况请暂停使用，先咨询医生</span>
+    </div>
+    <div class="cond-list">
+      <div class="cond-item"><span class="cond-dot">·</span><span>恶露量突然增多或出现血块</span></div>
+      <div class="cond-item"><span class="cond-dot">·</span><span>伤口出现红肿、发热、渗液</span></div>
+      <div class="cond-item"><span class="cond-dot">·</span><span>持续发热（体温 > 38°C）</span></div>
+    </div>
+    <div class="btn-confirm-disclaimer" onclick="UI.confirmDisclaimer()">✓ 我已了解，开始使用</div>
+  </div>
+</div>
+
+<!-- 分娩方式选择弹窗 -->
+<div class="modal-mask" id="deliveryModal" style="display:none">
+  <div class="modal-box delivery-box">
+    <div class="modal-title">你是哪种分娩方式？</div>
+    <div class="modal-sub">我们会根据你的选择推荐适合的训练计划</div>
+    <div class="delivery-row">
+      <div class="delivery-btn active" onclick="UI.selectDelivery('vaginal')">
+        <div class="delivery-icon">♥</div>
+        <div class="delivery-name">顺产</div>
+        <div class="delivery-desc">自然分娩</div>
+      </div>
+      <div class="delivery-btn" onclick="UI.selectDelivery('csection')">
+        <div class="delivery-icon">✂</div>
+        <div class="delivery-name">剖宫产</div>
+        <div class="delivery-desc">剖腹产</div>
+      </div>
+    </div>
+    <p class="delivery-note">⚠ 剖宫产妈妈部分动作术后2周内暂缓开放，所有安排均遵循临床指南</p>
+  </div>
+</div>
+
+<!-- 跳过确认弹窗 -->
+<div class="modal-mask" id="skipModal" style="display:none">
+  <div class="skip-sheet">
+    <div class="skip-handle"></div>
+    <div class="skip-title">跳过本组剩余步骤？</div>
+    <div class="skip-sub">将跳过剩余步骤，直接进入组间休息</div>
+    <div class="skip-btns">
+      <div class="skip-btn-cancel" onclick="Practice.hideSkip()">继续跟练</div>
+      <div class="skip-btn-ok" onclick="Practice.confirmSkip()">确认跳过</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<script src="js/data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

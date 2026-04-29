@@ -1,0 +1,148 @@
+/* pages/stage/stage.wxss */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.stage-banner {
+  padding: 40rpx 48rpx 40rpx;
+  background: linear-gradient(180deg, var(--primary-dk) 0%, var(--primary) 100%);
+}
+.banner-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+}
+.banner-sub {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.screen-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 运动目标 */
+.goal-card {
+  background: var(--card);
+  padding: 32rpx 40rpx;
+}
+.goal-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--txt-1);
+  margin-bottom: 24rpx;
+  display: block;
+}
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  font-size: 26rpx;
+  color: var(--txt-1);
+}
+.goal-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+/* 区块标题 */
+.section-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 40rpx 16rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--txt-1);
+}
+.section-count {
+  font-size: 26rpx;
+  color: var(--txt-2);
+}
+
+/* 动作列表 */
+.ex-list {
+  padding: 0 32rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.ex-item {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 0 28rpx;
+  height: 136rpx;
+  background: var(--card);
+  border-radius: var(--r-md);
+  border: 2rpx solid var(--border);
+}
+.ex-item:active {
+  background: #F5F2EF;
+}
+.ex-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 20rpx;
+  background: var(--primary-lt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ex-icon-text {
+  font-size: 40rpx;
+}
+.ex-info {
+  flex: 1;
+}
+.ex-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--txt-1);
+  display: block;
+}
+.ex-freq {
+  font-size: 24rpx;
+  color: var(--txt-2);
+  margin-top: 6rpx;
+  display: block;
+}
+.ex-chevron {
+  font-size: 36rpx;
+  color: var(--txt-3);
+  flex-shrink: 0;
+}
+
+.spacer {
+  height: 40rpx;
+}
+
+/* 底部栏 */
+.bottom-bar {
+  flex-shrink: 0;
+  padding: 24rpx 40rpx 56rpx;
+  background: var(--card);
+  border-top: 2rpx solid var(--border);
+}
+
+.ex-name-row { display: flex; flex-direction: row; align-items: center; gap: 8rpx; flex-wrap: wrap; }
+.ex-guide-badge { font-size: 20rpx; color: #8BAF9A; background: #E8F2EC; padding: 2rpx 10rpx; border-radius: 8rpx; }
+.ex-locked { opacity: 0.45; }

@@ -1,0 +1,87 @@
+<!--pages/practice/practice.wxml - 口令跟练-->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="p-nav">
+    <view class="p-close" bindtap="askExit">
+      <text class="close-x">✕</text>
+    </view>
+    <text class="p-nav-title">{{exName}}</text>
+    <view class="p-voice" bindtap="toggleVoice">
+      <text class="voice-icon">{{voiceOn ? '🔊' : '🔇'}}</text>
+    </view>
+  </view>
+
+  <!-- 进度条 -->
+  <view class="p-progress">
+    <text class="p-ex-name">{{exName}}</text>
+    <view class="p-set-row">
+      <text class="p-set-lbl">{{setLabel}}</text>
+      <view class="p-dots">
+        <view wx:for="{{setsArr}}" wx:key="index"
+              class="p-dot {{item <= currentSet ? 'p-dot-active' : ''}}"></view>
+      </view>
+    </view>
+    <view class="p-track">
+      <view class="p-fill" style="width:{{progressPct}}%"></view>
+    </view>
+  </view>
+
+  <!-- 主区域 -->
+  <view class="p-main">
+    <text class="cue-text {{isRest ? 'rest' : ''}}">{{cue}}</text>
+
+    <view class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 220 220">
+        <circle class="ring-bg" cx="110" cy="110" r="110"/>
+        <circle class="ring-track" cx="110" cy="110" r="88"/>
+        <circle class="ring-progress {{isRest ? 'rest' : ''}}" cx="110" cy="110" r="88"
+          style="stroke-dashoffset:{{ringOffset}}"/>
+      </svg>
+      <text class="timer-num">{{num}}</text>
+    </view>
+
+    <text class="phase-chip">{{phase}}</text>
+    <text wx:if="{{hint}}" class="hint-text">{{hint}}</text>
+    <text class="next-cue-txt">{{nextCue}}</text>
+  </view>
+
+  <!-- 控制栏 -->
+  <view class="ctrl-bar">
+    <view class="ctrl-sm" bindtap="askExit">
+      <text class="ctrl-icon">✕</text>
+      <text class="ctrl-label">结束</text>
+    </view>
+    <view class="ctrl-lg" bindtap="togglePause">
+      <text class="ctrl-lg-icon">{{paused ? '▶' : '❚❚'}}</text>
+    </view>
+    <view class="ctrl-sm" bindtap="askSkip">
+      <text class="ctrl-icon">⏭</text>
+      <text class="ctrl-label">跳过本组</text>
+    </view>
+  </view>
+</view>
+
+<!-- 退出确认弹窗 -->
+<view class="modal-mask" wx:if="{{showExitModal}}">
+  <view class="modal-box">
+    <text class="modal-title">确定结束训练？</text>
+    <text class="modal-body">当前进度将会丢失</text>
+    <view class="modal-btns">
+      <view class="modal-btn-cancel" bindtap="hideExit">继续训练</view>
+      <view class="modal-btn-ok" bindtap="confirmExit">确定退出</view>
+    </view>
+  </view>
+</view>
+
+<!-- 跳过确认弹窗 -->
+<view class="modal-mask" wx:if="{{showSkipModal}}">
+  <view class="skip-sheet">
+    <view class="skip-handle"></view>
+    <text class="skip-title">跳过本组剩余步骤？</text>
+    <text class="skip-sub">将跳过剩余步骤，直接进入组间休息</text>
+    <view class="skip-btns">
+      <view class="skip-btn-cancel" bindtap="hideSkip">继续跟练</view>
+      <view class="skip-btn-ok" bindtap="confirmSkip">确认跳过</view>
+    </view>
+  </view>
+</view>

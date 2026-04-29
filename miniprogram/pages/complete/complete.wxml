@@ -1,0 +1,39 @@
+<!--pages/complete/complete.wxml - 练习完成-->
+<view class="container">
+  <view class="done-top">
+    <view class="done-close" bindtap="goHome">
+      <text class="close-x">✕</text>
+    </view>
+  </view>
+
+  <view class="done-hero">
+    <view class="check-circle">
+      <text class="check-icon">✓</text>
+    </view>
+    <text class="done-title">太棒了！</text>
+    <text class="done-subtitle">{{exName}}已完成</text>
+    <view class="encourage-card">
+      <text>{{encourage}}</text>
+    </view>
+    <view class="stats-row">
+      <view class="stat-card">
+        <text class="stat-val">{{sets}}</text>
+        <text class="stat-lbl">组已完成</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-val">{{time}}</text>
+        <text class="stat-lbl">训练时长</text>
+      </view>
+    </view>
+    <text class="safety-tip">如练习中出现疼痛加剧或出血增多，请立即停止并咨询医生</text>
+  </view>
+
+  <view class="done-bottom">
+    <view class="btn-primary-dark" wx:if="{{nextId}}" bindtap="goNext">
+      <text>继续下一个动作</text>
+    </view>
+    <view class="btn-secondary-dark" bindtap="goList">
+      <text>返回动作列表</text>
+    </view>
+  </view>
+</view>
