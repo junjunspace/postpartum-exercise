@@ -18,10 +18,13 @@
   "simulatorPluginLibVersion": {},
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "images/exercises" }
+      { "type": "folder", "value": "images/exercises" },
+      { "type": "folder", "value": "audio_backup" },
+      { "type": "folder", "value": "audio_compressed" }
     ],
     "include": []
   },
   "appid": "wxee4afceb62b2a35e",
+  "cloudbaseRoot": "./cloudfunctions/",
   "editorSetting": {}
 }

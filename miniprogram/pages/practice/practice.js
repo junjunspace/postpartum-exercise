@@ -3,6 +3,21 @@ const { EXERCISES, ENCOURAGEMENTS } = require('../../utils/data.js');
 
 const CIRC = 2 * Math.PI * 88; // ≈553
 
+// cloud:// URL → 本地音频路径映射（云存储不可用时的兜底）
+var CLOUD_TO_LOCAL = {};
+(function() {
+  var envPrefix = 'cloud://cloud1-d1gp0f2s312426955.636c-cloud1-d1gp0f2s312426955-1420052148/audio/';
+  var exercises = ['e01','e02','e03','e04','e05','e06','e07'];
+  var counts = { e01:5, e02:3, e03:4, e04:4, e05:5, e06:7, e07:4 };
+  exercises.forEach(function(ex) {
+    for (var i = 1; i <= counts[ex]; i++) {
+      var num = (i < 10 ? '0' : '') + i;
+      CLOUD_TO_LOCAL[envPrefix + ex + '/' + num + '.m4a'] = ex + '/' + num;
+    }
+  });
+  CLOUD_TO_LOCAL[envPrefix + 'common/rest.m4a'] = 'common/rest';
+})();
+
 Page({
   data: {
     exName: '',
@@ -52,7 +67,67 @@ Page({
 
     this.setData({ exName: ex.name, voiceOn: wx.getStorageSync('voiceOn') !== false });
     this._build(ex);
-    this._playStep();
+
+    // 获取云音频临时 URL
+    this._resolveAudio(ex);
+  },
+
+  _resolveAudio(ex, retry) {
+    var self = this;
+    retry = retry || 0;
+
+    // 为每个步骤附加本地音频路径（兜底）
+    this._seq.forEach(function(step) {
+      if (step.audio && CLOUD_TO_LOCAL[step.audio]) {
+        step._localAudio = CLOUD_TO_LOCAL[step.audio];
+      }
+    });
+
+    // 收集所有 cloud:// 开头的音频 ID
+    var fileIDs = [];
+    ex.practice.steps.forEach(function(st) {
+      if (st.audio && st.audio.indexOf('cloud://') === 0 && fileIDs.indexOf(st.audio) === -1) {
+        fileIDs.push(st.audio);
+      }
+    });
+
+    if (fileIDs.length === 0 || !wx.cloud || !wx.cloud.getTempFileURL) {
+      this._playStep();
+      return;
+    }
+
+    wx.cloud.getTempFileURL({
+      fileList: fileIDs,
+      success: function(res) {
+        var urlMap = {};
+        var allValid = true;
+        res.fileList.forEach(function(f) {
+          if (f.tempFileURL) {
+            urlMap[f.fileID] = f.tempFileURL;
+          } else {
+            allValid = false;
+          }
+        });
+        if (allValid) {
+          self._seq.forEach(function(step) {
+            if (step.audio && urlMap[step.audio]) {
+              step.audio = urlMap[step.audio];
+            }
+          });
+        }
+        self._playStep();
+      },
+      fail: function(err) {
+        console.error('[音频] 云URL获取失败:', JSON.stringify(err));
+        if (retry < 2) {
+          setTimeout(function() {
+            self._resolveAudio(ex, retry + 1);
+          }, 1000);
+          return;
+        }
+        self._playStep();
+      }
+    });
   },
 
   onHide() {
@@ -302,6 +377,14 @@ Page({
     var audio = wx.createInnerAudioContext();
     audio.src = step.audio;
     audio.onEnded(function() { self._audioEnd = true; });
+    audio.onError(function(err) {
+      console.error('[音频] 播放失败:', JSON.stringify(err), 'src:', step.audio);
+      // 云 URL 失败时，尝试本地音频兜底
+      if (step._localAudio && audio.src !== '/audio/' + step._localAudio + '.m4a') {
+        audio.src = '/audio/' + step._localAudio + '.m4a';
+        audio.play();
+      }
+    });
     audio.play();
     this._audio = audio;
     this._audioSrc = step.audio;
