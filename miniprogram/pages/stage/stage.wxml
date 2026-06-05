@@ -1,35 +1,21 @@
 <!--pages/stage/stage.wxml - 阶段详情 · 动作列表-->
-<view class="container">
+<view class="container" wx:if="{{phase}}">
   <view class="stage-banner">
-    <text class="banner-title">产后 0—6 周</text>
-    <text class="banner-sub">急性修复期 · 顺产24h后 / 剖宫产48-72h后开始</text>
+    <text class="banner-title">{{bannerTitle}}</text>
+    <text class="banner-sub">{{bannerSub}}</text>
   </view>
 
   <scroll-view class="screen-body" scroll-y>
-    <!-- 运动目标 -->
     <view class="goal-card">
       <text class="goal-title">本阶段运动目标</text>
       <view class="goal-list">
-        <view class="goal-item">
+        <view class="goal-item" wx:for="{{phase.goals}}" wx:key="index">
           <view class="goal-dot"></view>
-          <text>促进血液循环，预防下肢血栓</text>
-        </view>
-        <view class="goal-item">
-          <view class="goal-dot"></view>
-          <text>温和激活盆底和深层核心</text>
-        </view>
-        <view class="goal-item">
-          <view class="goal-dot"></view>
-          <text>改善呼吸模式，恢复核心内压调控</text>
-        </view>
-        <view class="goal-item">
-          <view class="goal-dot"></view>
-          <text>缓解腰背疼痛和水肿</text>
+          <text>{{item}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 动作列表 -->
     <view class="section-hd">
       <text class="section-title">本阶段动作</text>
       <text class="section-count">共 {{exercises.length}} 个动作</text>
@@ -42,7 +28,7 @@
         <view class="ex-info">
           <view class="ex-name-row">
             <text class="ex-name">{{item.name}}</text>
-            <text wx:if="{{item.practice.mode === 'guide'}}" class="ex-guide-badge">📋 指导</text>
+            <text wx:if="{{item.mode === 'guide'}}" class="ex-guide-badge">📋 指导</text>
           </view>
           <text class="ex-freq">{{item.freq}}</text>
         </view>
@@ -52,7 +38,6 @@
     <view class="spacer"></view>
   </scroll-view>
 
-  <!-- 底部按钮 -->
   <view class="bottom-bar">
     <view class="btn-primary" bindtap="startFull">
       <text>▶  开始全套跟练</text>

@@ -6,7 +6,6 @@
   background: var(--bg);
 }
 
-/* 顶部图区 */
 .ex-img {
   background: #2A3530;
   height: 400rpx;
@@ -38,7 +37,6 @@
   min-height: 0;
 }
 
-/* 基本信息 */
 .detail-info {
   background: var(--card);
   padding: 36rpx 40rpx 28rpx;
@@ -63,7 +61,6 @@
   display: block;
 }
 
-/* 步骤 */
 .steps-sec {
   background: var(--bg);
   padding: 32rpx 40rpx 24rpx;
@@ -102,7 +99,6 @@
   flex: 1;
 }
 
-/* 注意事项 */
 .notes-sec {
   background: var(--warn-bg);
   padding: 32rpx 40rpx;
@@ -146,7 +142,6 @@
   height: 160rpx;
 }
 
-/* 底部栏 */
 .bottom-bar {
   position: fixed;
   left: 0;

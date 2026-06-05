@@ -1,5 +1,5 @@
-// pages/detail/detail.js
-const { EXERCISES } = require('../../utils/data.js');
+const { getExerciseById } = require('../../utils/data.js');
+const { setCurrentPhase } = require('../../utils/session.js');
 
 Page({
   data: {
@@ -8,11 +8,13 @@ Page({
 
   onLoad(options) {
     var id = options.id;
-    var ex = EXERCISES.find(function(e) { return e.id === id; });
+    var ex = getExerciseById(id);
     if (!ex) {
       console.error('detail: exercise not found', id);
       return;
     }
+
+    setCurrentPhase(ex.phase);
     this.setData({ ex: ex });
     wx.setNavigationBarTitle({ title: ex.name });
   },

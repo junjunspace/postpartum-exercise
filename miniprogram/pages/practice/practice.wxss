@@ -6,7 +6,6 @@
   background: var(--dark-bg);
 }
 
-/* 顶部导航 */
 .p-nav {
   display: flex;
   align-items: center;
@@ -49,7 +48,6 @@
   color: #fff;
 }
 
-/* 进度条 */
 .p-progress {
   padding: 16rpx 48rpx 28rpx;
   flex-shrink: 0;
@@ -102,7 +100,6 @@
   transition: width 0.8s ease;
 }
 
-/* 主区域 */
 .p-main {
   flex: 1;
   display: flex;
@@ -126,7 +123,6 @@
   font-size: 44rpx;
 }
 
-/* 圆环计时器 */
 .timer-wrap {
   position: relative;
   width: 440rpx;
@@ -184,7 +180,6 @@
   text-align: center;
 }
 
-/* 控制栏 */
 .ctrl-bar {
   display: flex;
   align-items: center;
@@ -233,7 +228,6 @@
   color: #fff;
 }
 
-/* 退出确认弹窗 */
 .modal-mask {
   position: fixed;
   inset: 0;

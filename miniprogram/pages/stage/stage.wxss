@@ -29,7 +29,6 @@
   min-height: 0;
 }
 
-/* 运动目标 */
 .goal-card {
   background: var(--card);
   padding: 32rpx 40rpx;
@@ -61,7 +60,6 @@
   flex-shrink: 0;
 }
 
-/* 区块标题 */
 .section-hd {
   display: flex;
   justify-content: space-between;
@@ -78,7 +76,6 @@
   color: var(--txt-2);
 }
 
-/* 动作列表 */
 .ex-list {
   padding: 0 32rpx 16rpx;
   display: flex;
@@ -136,7 +133,6 @@
   height: 40rpx;
 }
 
-/* 底部栏 */
 .bottom-bar {
   flex-shrink: 0;
   padding: 24rpx 40rpx 56rpx;
@@ -144,6 +140,20 @@
   border-top: 2rpx solid var(--border);
 }
 
-.ex-name-row { display: flex; flex-direction: row; align-items: center; gap: 8rpx; flex-wrap: wrap; }
-.ex-guide-badge { font-size: 20rpx; color: #8BAF9A; background: #E8F2EC; padding: 2rpx 10rpx; border-radius: 8rpx; }
-.ex-locked { opacity: 0.45; }
+.ex-name-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+  flex-wrap: wrap;
+}
+.ex-guide-badge {
+  font-size: 20rpx;
+  color: #8BAF9A;
+  background: #E8F2EC;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+.ex-locked {
+  opacity: 0.45;
+}

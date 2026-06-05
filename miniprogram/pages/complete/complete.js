@@ -1,11 +1,13 @@
-// pages/complete/complete.js
+const { setCurrentPhase } = require('../../utils/session.js');
+
 Page({
   data: {
     exName: '',
     sets: '',
     time: '',
     encourage: '',
-    nextId: ''
+    nextId: '',
+    phaseId: 1
   },
 
   onLoad(options) {
@@ -14,18 +16,21 @@ Page({
       sets: options.sets || '',
       time: decodeURIComponent(options.time || ''),
       encourage: decodeURIComponent(options.enc || ''),
-      nextId: options.nextId || ''
+      nextId: options.nextId || '',
+      phaseId: Number(options.phase) || 1
     });
   },
 
   goNext() {
+    if (!this.data.nextId) return;
     wx.redirectTo({
       url: '/pages/practice/practice?id=' + this.data.nextId
     });
   },
 
   goList() {
-    wx.navigateBack({ delta: 2 });
+    setCurrentPhase(this.data.phaseId);
+    wx.switchTab({ url: '/pages/stage/stage' });
   },
 
   goHome() {

@@ -1,6 +1,5 @@
 <!--pages/detail/detail.wxml - 动作详情-->
 <view class="container" wx:if="{{ex}}">
-  <!-- 顶部图区 -->
   <view class="ex-img">
     <image wx:if="{{ex.gif}}" class="ex-gif" src="{{ex.gif}}" mode="aspectFit" autoplay></image>
     <view wx:else class="ex-img-circle">
@@ -9,7 +8,6 @@
   </view>
 
   <scroll-view class="screen-body" scroll-y>
-    <!-- 基本信息 -->
     <view class="detail-info">
       <text class="detail-name">{{ex.name}}</text>
       <view class="detail-tags">
@@ -18,7 +16,6 @@
       <text class="detail-purpose">{{ex.purpose}}</text>
     </view>
 
-    <!-- 动作步骤 -->
     <view class="steps-sec">
       <text class="steps-title">动作步骤</text>
       <view class="step-item" wx:for="{{ex.steps}}" wx:key="index">
@@ -27,7 +24,6 @@
       </view>
     </view>
 
-    <!-- 注意事项 -->
     <view class="notes-sec">
       <view class="notes-hd">
         <text class="notes-icon">⚠️</text>
@@ -42,10 +38,9 @@
     <view class="spacer"></view>
   </scroll-view>
 
-  <!-- 底部按钮 -->
   <view class="bottom-bar">
     <view class="btn-primary" bindtap="startPractice">
-      <text>▶  开始跟练此动作</text>
+      <text>{{ex.mode === 'guide' ? '▶  开始查看动作指导' : '▶  开始跟练此动作'}}</text>
     </view>
   </view>
 </view>

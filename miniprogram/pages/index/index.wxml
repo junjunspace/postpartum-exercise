@@ -1,4 +1,3 @@
-<!--pages/index/index.wxml - 首页 · 阶段选择-->
 <view class="container">
   <view class="home-header">
     <text class="home-greeting">嗨，你来了 ✨</text>
@@ -8,7 +7,6 @@
 
   <scroll-view class="screen-body" scroll-y>
     <view class="stage-list">
-      <!-- 第一阶段：可选 -->
       <view class="s-card-on" bindtap="goStage">
         <view class="s-card-left">
           <view class="s-badge s-badge-on">第一阶段</view>
@@ -24,19 +22,21 @@
         </view>
       </view>
 
-      <!-- 第二阶段：锁定 -->
-      <view class="s-card-off" bindtap="onLockedTap">
+      <view class="{{phase2Unlocked ? 's-card-on' : 's-card-off'}}" bindtap="onPhase2Tap">
         <view class="s-card-left">
-          <view class="s-badge-off">第二阶段</view>
-          <text class="s-period-off">产后 6—12 周</text>
-          <text class="s-sub-off">功能重建期</text>
+          <view class="{{phase2Unlocked ? 's-badge s-badge-on' : 's-badge-off'}}">第二阶段</view>
+          <text class="{{phase2Unlocked ? 's-period' : 's-period-off'}}">产后 6—12 周</text>
+          <text wx:if="{{phase2Unlocked}}" class="s-date-hint">第 43 天至第 84 天</text>
+          <text class="{{phase2Unlocked ? 's-sub' : 's-sub-off'}}">功能重建期</text>
+          <view class="s-tags" wx:if="{{phase2Unlocked}}">
+            <text class="tag tag-white">8个动作</text>
+          </view>
         </view>
-        <view class="s-lock">
-          <text class="lock-text">🔒</text>
+        <view class="{{phase2Unlocked ? 's-arrow' : 's-lock'}}">
+          <text class="{{phase2Unlocked ? 'arrow-text' : 'lock-text'}}">{{phase2Unlocked ? '›' : '🔒'}}</text>
         </view>
       </view>
 
-      <!-- 第三阶段：锁定 -->
       <view class="s-card-off" bindtap="onLockedTap">
         <view class="s-card-left">
           <view class="s-badge-off">第三阶段</view>
@@ -48,7 +48,6 @@
         </view>
       </view>
 
-      <!-- 第四阶段：锁定 -->
       <view class="s-card-off" bindtap="onLockedTap">
         <view class="s-card-left">
           <view class="s-badge-off">第四阶段</view>
@@ -62,7 +61,6 @@
     </view>
   </scroll-view>
 
-  <!-- 医学禁忌弹窗 -->
   <view class="modal-mask" wx:if="{{showDisclaimer}}">
     <view class="modal-box disclaimer-box">
       <text class="modal-icon">🛡️</text>
@@ -80,24 +78,41 @@
     </view>
   </view>
 
-  <!-- 分娩方式筛查 -->
   <view class="modal-mask" wx:if="{{showDelivery}}">
     <view class="modal-box delivery-box">
       <text class="modal-title">你是哪种分娩方式？</text>
       <text class="modal-sub">我们会根据你的选择推荐适合的训练计划</text>
       <view class="delivery-row">
-        <view class="delivery-btn active" bindtap="selectDelivery" data-type="vaginal">
+        <view class="delivery-btn {{deliveryType === 'vd' ? 'active' : ''}}" bindtap="selectDelivery" data-type="vd">
           <text class="delivery-icon">♥</text>
           <text class="delivery-name">顺产</text>
           <text class="delivery-desc">自然分娩</text>
         </view>
-        <view class="delivery-btn" bindtap="selectDelivery" data-type="csection">
+        <view class="delivery-btn {{deliveryType === 'cs' ? 'active' : ''}}" bindtap="selectDelivery" data-type="cs">
           <text class="delivery-icon">✂</text>
           <text class="delivery-name">剖宫产</text>
           <text class="delivery-desc">剖腹产</text>
         </view>
       </view>
       <text class="delivery-note">⚠ 剖宫产妈妈部分动作术后2周内暂缓开放，所有安排均遵循临床指南</text>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showPhase2Confirm}}">
+    <view class="modal-box delivery-box">
+      <text class="modal-title">进入第二阶段前请确认</text>
+      <text class="modal-sub">你是否已完成产后 6 周医学检查，且医生确认以下情况均已满足？</text>
+      <view class="cond-list phase2-list">
+        <view class="cond-item"><text class="cond-dot">✓</text><text>子宫已完全复旧</text></view>
+        <view class="cond-item"><text class="cond-dot">✓</text><text>会阴或腹部伤口已完全愈合</text></view>
+        <view class="cond-item"><text class="cond-dot">✓</text><text>恶露已停止</text></view>
+        <view class="cond-item"><text class="cond-dot">✓</text><text>无盆底脱垂或严重功能障碍</text></view>
+      </view>
+      <text class="delivery-note">以上任意一项未确认，请先咨询医生。</text>
+      <view class="phase2-btns">
+        <view class="modal-btn-ok disclaimer-btn" bindtap="confirmPhase2Check">我已完成检查</view>
+        <view class="phase2-btn-cancel" bindtap="cancelPhase2Check">尚未检查，返回</view>
+      </view>
     </view>
   </view>
 </view>

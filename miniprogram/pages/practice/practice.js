@@ -1,7 +1,36 @@
 // pages/practice/practice.js
-const { EXERCISES, ENCOURAGEMENTS } = require('../../utils/data.js');
+const {
+  EXERCISES,
+  ENCOURAGEMENTS,
+  getExerciseById,
+  getExercisesByPhase
+} = require('../../utils/data.js');
+const { setCurrentPhase } = require('../../utils/session.js');
 
 const CIRC = 2 * Math.PI * 88; // ≈553
+
+function attachLocalAudio(exercise) {
+  if (!exercise || !exercise.practice || !exercise.practice.steps) {
+    return exercise;
+  }
+
+  var steps = exercise.practice.steps.map(function(step, index) {
+    if (step.audio) {
+      return Object.assign({}, step);
+    }
+
+    var num = index + 1 < 10 ? '0' + (index + 1) : String(index + 1);
+    return Object.assign({}, step, {
+      audio: '/audio/' + exercise.id + '/' + num + '.m4a'
+    });
+  });
+
+  return Object.assign({}, exercise, {
+    practice: Object.assign({}, exercise.practice, {
+      steps: steps
+    })
+  });
+}
 
 // cloud:// URL → 本地音频路径映射（云存储不可用时的兜底）
 var CLOUD_TO_LOCAL = {};
@@ -21,10 +50,13 @@ var CLOUD_TO_LOCAL = {};
 Page({
   data: {
     exName: '',
+    isPhase1: true,
+    phaseTag: '',
     cue: '准备开始',
     phase: '准备',
     num: '--',
     progressPct: 0,
+    overallPct: 0,
     setLabel: '',
     currentSet: 0,
     totalSets: 0,
@@ -36,7 +68,8 @@ Page({
     showExitModal: false,
     showSkipModal: false,
     hint: '',
-    voiceOn: true
+    voiceOn: true,
+    restSeconds: 0
   },
 
   // ---- timer state (non-data) ----
@@ -56,16 +89,23 @@ Page({
 
   onLoad(options) {
     const id = options.id;
-    const ex = EXERCISES.find(e => e.id === id);
+    const ex = attachLocalAudio(getExerciseById(id));
     if (!ex) return;
     this._exercise = ex;
+    setCurrentPhase(ex.phase);
 
-    // find next exercise
-    const arr = EXERCISES;
+    // find next exercise in the same phase
+    const arr = getExercisesByPhase(ex.phase);
     const ci = arr.findIndex(e => e.id === id);
     this._nextExId = ci < arr.length - 1 ? arr[ci + 1].id : null;
 
-    this.setData({ exName: ex.name, voiceOn: wx.getStorageSync('voiceOn') !== false });
+    this.setData({
+      exName: ex.name,
+      isPhase1: ex.phase === 1,
+      phaseTag: 'PHASE ' + ex.phase + ' · ' + ex.id.toUpperCase(),
+      voiceOn: wx.getStorageSync('voiceOn') !== false,
+      restSeconds: ex.practice.rest || 0
+    });
     this._build(ex);
 
     // 获取云音频临时 URL
@@ -207,7 +247,8 @@ Page({
 
     // render
     const nextStep = this._seq[this._idx + 1];
-    const pct = this._setTotal > 0 ? Math.round(this._setElapsed / this._setTotal * 100) : 0;
+    const overallPct = this._total > 0 ? Math.round(this._elapsed / this._total * 100) : 0;
+    const setPct = this._setTotal > 0 ? Math.round(this._setElapsed / this._setTotal * 100) : 0;
     var setsArr = [];
     for (var i = 1; i <= step.totalSets; i++) setsArr.push(i);
     this.setData({
@@ -216,7 +257,8 @@ Page({
       num: step.dur,
       isRest: !!step.isRest,
       ringOffset: 553,
-      progressPct: pct,
+      progressPct: setPct,
+      overallPct: overallPct,
       setLabel: '第 ' + step.set + ' 组 / 共 ' + step.totalSets + ' 组',
       currentSet: step.set,
       totalSets: step.totalSets,
@@ -241,11 +283,12 @@ Page({
       this._setElapsed++;
       tickCount++;
 
-      const pct = this._setTotal > 0 ? Math.round(this._setElapsed / this._setTotal * 100) : 0;
+      const overallPct = this._total > 0 ? Math.min(Math.round(this._elapsed / this._total * 100), 100) : 0;
+      const setPct = this._setTotal > 0 ? Math.min(Math.round(this._setElapsed / this._setTotal * 100), 100) : 0;
       // ring: fraction elapsed within this step
       const ringP = Math.min(tickCount / totalDur, 1);
       const ringOffset = CIRC * (1 - ringP);
-      this.setData({ num: this._left, progressPct: pct, ringOffset: ringOffset });
+      this.setData({ num: this._left, progressPct: setPct, overallPct: overallPct, ringOffset: ringOffset });
 
       if (this._left <= 0) {
         this._clearTimers();
@@ -336,11 +379,13 @@ Page({
     const elapsed = this._elapsed;
     const mins = Math.floor(elapsed / 60);
     const secs = elapsed % 60;
-    const timeStr = mins > 0 ? mins + ' min' : secs + ' s';
+    const timeStr = mins > 0 ? (mins + '分' + (secs ? secs + '秒' : '')) : (secs + '秒');
     const enc = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
 
     wx.navigateTo({
       url: '/pages/complete/complete?id=' + ex.id +
+        '&phase=' + ex.phase +
+        '&mode=' + ex.mode +
         '&name=' + encodeURIComponent(ex.name) +
         '&sets=' + ex.practice.totalSets +
         '&time=' + encodeURIComponent(timeStr) +
